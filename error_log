@@ -1,0 +1,16 @@
+[29-Mar-2024 18:42:59 Europe/London] PHP Fatal error:  Uncaught Error: Failed opening required '/home/red10000/boatdata.co.uk/view/../vendor/autoload.php' (include_path='.:/opt/alt/php82/usr/share/pear:/opt/alt/php82/usr/share/php:/usr/share/pear:/usr/share/php') in /home/red10000/boatdata.co.uk/view/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/red10000/boatdata.co.uk/view/index.php on line 34
+[29-Mar-2024 18:43:05 Europe/London] PHP Fatal error:  Uncaught Error: Failed opening required '/home/red10000/boatdata.co.uk/view/../vendor/autoload.php' (include_path='.:/opt/alt/php82/usr/share/pear:/opt/alt/php82/usr/share/php:/usr/share/pear:/usr/share/php') in /home/red10000/boatdata.co.uk/view/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/red10000/boatdata.co.uk/view/index.php on line 34
+[29-Mar-2024 18:45:42 Europe/London] PHP Fatal error:  Uncaught Error: Failed opening required '/home/red10000/boatdata.co.uk/view/../vendor/autoload.php' (include_path='.:/opt/alt/php82/usr/share/pear:/opt/alt/php82/usr/share/php:/usr/share/pear:/usr/share/php') in /home/red10000/boatdata.co.uk/view/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/red10000/boatdata.co.uk/view/index.php on line 34
+[29-Mar-2024 18:45:48 Europe/London] PHP Fatal error:  Uncaught Error: Failed opening required '/home/red10000/boatdata.co.uk/view/../vendor/autoload.php' (include_path='.:/opt/alt/php82/usr/share/pear:/opt/alt/php82/usr/share/php:/usr/share/pear:/usr/share/php') in /home/red10000/boatdata.co.uk/view/index.php:34
+Stack trace:
+#0 {main}
+  thrown in /home/red10000/boatdata.co.uk/view/index.php on line 34

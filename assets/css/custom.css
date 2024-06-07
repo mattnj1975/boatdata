@@ -1,0 +1,207 @@
+@font-face {
+  font-family: monrope;
+  src: url("../fonts/Manrope/Manrope-Regular.ttf");
+}
+
+@font-face {
+  font-family: outfit;
+  src: url("../fonts/Outfit/Outfit-Regular.ttf");
+}
+
+@font-face {
+  font-family: monrope-bold;
+  src: url("../fonts/Manrope/Manrope-Bold.ttf");
+}
+
+html {
+  font-family: monrope;
+  color: #23272c;
+}
+
+.font-bold {
+  font-family: monrope-bold;
+}
+
+.nav_item {
+  position: relative;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.nav_item::after {
+  content: "";
+}
+
+.font-outfit {
+  font-family: outfit;
+}
+
+@media screen and (max-width: 690px) {
+  :root {
+    font-size: 13px;
+  }
+}
+
+.nav_item {
+  cursor: pointer;
+}
+
+.bg-overlay {
+  background-image: url("../images/banner-overlay.png");
+  background-size: cover;
+  background-position: left top;
+}
+.bg-contact {
+  background-image: url("../images/contact-us.png");
+  background-size: cover;
+  background-position: bottom;
+  background-repeat: no-repeat;
+}
+.bg-overlay {
+  position: relative;
+}
+
+.bg-buildings {
+  position: absolute;
+  background-image: url("../images/building.png");
+  height: 22rem;
+  width: 120%;
+  top: 0;
+  right: 0;
+  z-index: -1;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: right;
+  transform: translateY(-30%);
+}
+.banner_animation .banner_svg {
+  position: absolute;
+}
+
+.banner_svg.van {
+  height: 25.5em;
+  width: 30.875em;
+  top: 0;
+}
+.banner_svg.large-couch {
+  height: 14.125em;
+  width: 18.5em;
+  bottom: 0;
+  left: 41%;
+}
+.banner_svg.small-couch {
+  width: 11.5em;
+  height: 9.9375em;
+  bottom: 8em;
+}
+.banner_svg.boxes {
+  width: 9.8125em;
+  height: 10.4375em;
+  bottom: 0em;
+  left: 15%;
+}
+.banner_svg.closet {
+  width: 10.25em;
+  height: 16.3125em;
+  top: 5em;
+  right: 0;
+}
+
+.banner_animation {
+  z-index: 3;
+  position: relative;
+  height: 36.5rem;
+}
+
+.navbar_scroll {
+  background-color: #fffaf2;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+#navbar {
+  transition: 0.2s ease-in;
+}
+.hover_card {
+  color: #23272c;
+  background-color: #fff;
+  transition: 0.25s ease-in;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+.hover_card:hover {
+  color: #fff;
+  background-color: #007afe;
+  transform: translateY(-5%);
+}
+
+.hover_card path,
+.hover_card rect {
+  transition: 0.25s ease-in;
+}
+
+.hover_card:hover path,
+.hover_card:hover rect {
+  fill: #fff;
+}
+
+.video_banner_p:hover .grid-play-btn .pause {
+  opacity: 1;
+}
+
+.video_banner_p .grid-play-btn .pause {
+  opacity: 0;
+}
+
+.render_html h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.render_html h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.render_html h3 {
+  font-size: 1.17em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.render_html p {
+  margin-bottom: 1em;
+  line-height: 1.5;
+}
+
+.render_html img {
+  width: 100%;
+  height: 18rem;
+  object-fit: cover;
+  margin: 2rem 0;
+}
+
+.render_html strong {
+  font-weight: bold;
+}
+
+.render_html em {
+  font-style: italic;
+}
+
+.render_html u {
+  text-decoration: underline;
+}
+
+.render_html del {
+  text-decoration: line-through;
+}
+
+.render_html a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.not-found-grid {
+  grid-column: 1/-1;
+}

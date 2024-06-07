@@ -1,0 +1,45 @@
+@media screen and (max-width: 991px) {
+  .banner_svg.van {
+    /* width: 20.875em; */
+    width: 70%;
+  }
+}
+
+@media screen and (max-width: 440px) {
+  .banner_svg {
+    font-size: 9px;
+  }
+  .banner_animation {
+    height: 26rem;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .banner_svg {
+    font-size: 10px;
+  }
+  .banner_animation {
+    height: 30rem;
+  }
+}
+
+@media screen and (max-width: 640px) and (min-width: 440px) {
+  .banner_animation {
+    width: 400px;
+    margin: auto;
+  }
+}
+
+@media screen and (min-width: 1024px) and (max-width: 1200px) {
+  .banner_animation {
+    font-size: 12px;
+    height: 30rem;
+  }
+}
+
+@media screen and (min-width: 1200px) and (max-width: 1280px) {
+  .banner_animation {
+    font-size: 14px;
+    height: 3docrem;
+  }
+}
