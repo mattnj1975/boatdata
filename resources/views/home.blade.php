@@ -100,7 +100,7 @@
             </ul>
             <div class="tab-content" id="tripData">
                 <div class="tab-pane fade" id="track-tab-pane" role="tabpanel" aria-labelledby="track-tab" tabindex="0" style="padding-top:15px;">
-                    <div id="map" style="width: 100%; height: 400px;"></div>
+                    <div id="map" style="width: 100%; height: 600px;"></div>
                     <div class="d-none" id="no-data-alert">No position data available</div>
                 </div>
                 <div class="tab-pane fade" id="data-tab-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0" style="padding-top:15px;">
@@ -161,7 +161,7 @@
                         <thead>
                             <tr>
                                 <th style="min-width:50px;max-width:50px;">Time (UTC)</th>
-                                <th style="">Vessel <br />Position99</th>
+                                <th style="">Vessel <br />Position</th>
                                 <th style="min-width:55px;max-width:55px;">SOG</th>
                                 <th style="min-width:60px;max-width:60px;">COG</th>
                                 <th style="min-width:50px;max-width:50px;">Depth</th>
@@ -203,7 +203,7 @@
                         <thead>
                             <tr>
                                 <th style="min-width:50px;max-width:50px;">Time (UTC)</th>
-                                <th style="">Vessel <br />Position99</th>
+                                <th style="">Vessel <br />Position</th>
                                 <th style="min-width:55px;max-width:55px;">SOG</th>
                                 <th style="min-width:60px;max-width:60px;">COG</th>
                                 <th style="min-width:50px;max-width:50px;">Depth</th>
@@ -239,6 +239,7 @@
         </div>
     </div>
 </div>
+<a name="map"></a>
 <input type="hidden" id="hidden-date">
 <input type="hidden" id="hidden-mac">
 @endsection
@@ -306,12 +307,13 @@
             var endIndex = startIndex + rowsPerPage;
             var displayedData = data.slice(startIndex, endIndex);
 
-            var tableHTML = '<table class="table border-secondary table-hover table-responsive table-bordered"><thead><tr><th>Boat Name</th><th>Trip Date</th><th>Start</th><th>Finish</th><th>Duration</th><th>Distance</th><th>Action</th></tr></thead><tbody>';
+            var tableHTML = '<table class="table border-secondary table-hover table-responsive table-bordered"><thead><tr><th></th><th>Boat Name</th><th>Trip Date</th><th>Start</th><th>Finish</th><th>Duration</th><th>Distance</th></tr></thead><tbody>';
 
             displayedData.forEach(function(item) {
                 var tripDate = new Date(item.TripDate);
                 var formattedTripDate = ('0' + tripDate.getDate()).slice(-2) + '/' + ('0' + (tripDate.getMonth() + 1)).slice(-2) + '/' + tripDate.getFullYear();
                 tableHTML += '<tr>';
+                tableHTML += '<td><div class="d-flex btn-group-lg" role="group" ><i style="cursor: pointer;" class="fa fa-solid fa-map viewLink viewTrack" title="Click here then scroll down"></i></div></td>';
                 tableHTML += '<td>' + item.boatname + ' </br>(<small data-mac="' + item.mac + '">' + item.mac + '</small>)</td>';
                 tableHTML += '<td data-date="' + formattedTripDate + '">' + formattedTripDate + '</td>';
                 tableHTML += '<td>' + (item.Begin ? item.Begin : 'N/A') + '</td>';
@@ -330,7 +332,7 @@
                 }
 
                 tableHTML += '<td>' + (item.Trip ? item.Trip : 'N/A') + '</td>';
-                tableHTML += '<td><div class="d-flex btn-group-lg" role="group" aria-label="Basic example"><i style="cursor: pointer;" class="fa fa-solid fa-map viewLink viewTrack" title="Track"></i>&nbsp;&nbsp;&nbsp;<i style="cursor: pointer;" class="fa fa-solid fa-table viewLink viewData" title="Data"></i></div></td>';
+                //tableHTML += '<td><div class="d-flex btn-group-lg" role="group" aria-label="Basic example"><i style="cursor: pointer;" class="fa fa-solid fa-map viewLink viewTrack" title="Track"></i>&nbsp;&nbsp;&nbsp;<i style="cursor: pointer;" class="fa fa-solid fa-table viewLink viewData" title="Data"></i></div></td>';
                 tableHTML += '</tr>';
             });
 
@@ -398,7 +400,7 @@
             $("#track-tab").removeClass('active')
 
             $("#myTab").removeClass('d-none')
-
+			location.hash = '#map';
 
 
             let date = $(this).closest('tr').find('td[data-date]').data('date');

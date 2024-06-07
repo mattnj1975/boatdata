@@ -202,7 +202,7 @@
             </ul>
             <div class="tab-content" id="tripData">
                 <div class="tab-pane fade" id="track-tab-pane" role="tabpanel" aria-labelledby="track-tab" tabindex="0" style="padding-top:15px;">
-                    <div id="map" style="width: 100%; height: 400px;"></div>
+                    <div id="map" style="width: 100%; height: 600px;"></div>
                     <div class="d-none" id="no-data-alert">No position data available</div>
                 </div>
                 <div class="tab-pane fade" id="data-tab-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0" style="padding-top:15px;">

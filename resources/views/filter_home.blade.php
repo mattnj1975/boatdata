@@ -40,13 +40,14 @@
                         <table class="table   border-secondary  table-hover w-100 table-responsive table-bordered">
                             <thead class="">
                                 <tr>
+									<th></th>
                                     <th>Boat Name</th>
                                     <th>Trip Date</th>
                                     <th>Start</th>
                                     <th>Finish</th>
                                     <th>Duration</th>
                                     <th>Distance</th>
-                                    <th>Action</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody id="tableBody">
@@ -92,7 +93,7 @@
             </ul>
             <div class="tab-content" id="tripData">
                 <div class="tab-pane fade" id="track-tab-pane" role="tabpanel" aria-labelledby="track-tab" tabindex="0" style="padding-top:15px;">
-                    <div id="map" style="width: 100%; height: 400px;"></div>
+                    <div id="map" style="width: 100%; height: 600px;"></div>
                     <div class="d-none" id="no-data-alert">No position data available</div>
                 </div>
                 <div class="tab-pane fade" id="data-tab-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0" style="padding-top:15px;">
@@ -153,7 +154,7 @@
                         <thead>
                             <tr>
                                 <th style="min-width:50px;max-width:50px;">Time (UTC)</th>
-                                <th style="">Vessel <br />Position99</th>
+                                <th style="">Vessel <br />Position</th>
                                 <th style="min-width:55px;max-width:55px;">SOG</th>
                                 <th style="min-width:60px;max-width:60px;">COG</th>
                                 <th style="min-width:50px;max-width:50px;">Depth</th>
@@ -231,6 +232,7 @@
         </div>
     </div>
 </div>
+<a name="map"></a>
 <input type="hidden" id="hidden-date">
 <input type="hidden" id="hidden-mac">
 @endsection
@@ -268,6 +270,12 @@
                 var formattedTripDate = ('0' + tripDate.getDate()).slice(-2) + '/' + ('0' + (tripDate.getMonth() + 1)).slice(-2) + '/' + tripDate.getFullYear();
 
                 var row = '<tr>' +
+				'<td>' +
+                            '<div class="d-flex btn-group-lg" role="group" >' +
+                                '<i style="cursor: pointer;" class="fa fa-solid fa-map viewLink viewTrack" title="Click here then scroll down"></i>&nbsp;&nbsp;&nbsp;' +
+                                
+                            '</div>' +
+                        '</td>' +
                             '<td>' + item['boatname'] + ' <br> (<small data-mac="' + item['mac'] + '">' + item['mac'] + '</small>)</td>' +
                             '<td data-date="' + formattedTripDate + '">' + formattedTripDate + '</td>' +
                             '<td>' + (item['Begin'] ? item['Begin'] : 'N/A') + '</td>' +
@@ -286,12 +294,6 @@
                 }
 
                 row += '<td>' + (item['Trip'] ? item['Trip'] : 'N/A') + '</td>' +
-                        '<td>' +
-                            '<div class="d-flex btn-group-lg" role="group" aria-label="Basic example">' +
-                                '<i style="cursor: pointer;" class="fa fa-solid fa-map viewLink viewTrack" title="Track"></i>&nbsp;&nbsp;&nbsp;' +
-                                '<i style="cursor: pointer;" class="fa fa-solid fa-table viewLink viewData" title="Data"></i>' +
-                            '</div>' +
-                        '</td>' +
                         '</tr>';
 
                 tableBody.innerHTML += row;
@@ -367,7 +369,7 @@
             $("#track-tab").removeClass('active')
 
             $("#myTab").removeClass('d-none')
-
+			location.hash = '#map';
 
 
             let date = $(this).closest('tr').find('td[data-date]').data('date');
@@ -381,6 +383,8 @@
 
 
             $("#track-tab").click()
+			
+			
         });
         $(document).on("click", ".viewData", function() {
             $('#boat_details').show();
