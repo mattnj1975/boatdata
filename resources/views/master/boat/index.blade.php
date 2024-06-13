@@ -30,7 +30,7 @@
             <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="email">Seach By MAC :</label>
+                    <label for="email">Search By MAC :</label>
                     <input type="text" name="filter_mac" class="form-control" id="filter_mac"  placeholder="Search by MAC" />
                 </div>
             </div>

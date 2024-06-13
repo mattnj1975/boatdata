@@ -25,40 +25,19 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
-// Route::get('/', function () {
-//     if (Auth::user()) {
-//         if (Auth::user()->role_as == 1) {
-//             return redirect('admin');
-//         } elseif (Auth::user()->role_as == 2) {
-//             return redirect('master');
-//         } else {
-//             return redirect('user');
-//         }
-//     } else {
-//         return view('auth.login');
-//     }
-// });
 Route::get('/', [HomeController::class, 'searchPage'])->name('search');
-
 Route::post('/search', [HomeController::class, 'searchMac'])->name('search.mac');
-
 Route::get('forget-password', [ForgotPasswordController::class, 'showForgetPasswordForm'])->name('forget.password.get');
 Route::post('forget-password', [ForgotPasswordController::class, 'submitForgetPasswordForm'])->name('forget.password.post'); 
 Route::get('reset-password/{token}', [ForgotPasswordController::class, 'showResetPasswordForm'])->name('reset.password.get');
 Route::post('reset-password', [ForgotPasswordController::class, 'submitResetPasswordForm'])->name('reset.password.post');
-
-
 Route::post('/assets/ajax/get-track-data', [TripsController::class, 'getTrackData'])->name('admin.getTrackData');
 Route::post('/assets/ajax/get-log-data', [TripsController::class, 'getLogData'])->name('admin.getLogData');
 Route::post('/assets/ajax/get-table-data', [TripsController::class, 'getTableData'])->name('admin.getTableData');
 Route::post('/assets/ajax/get-speed-data', [TripsController::class, 'fetchSpeed'])->name('admin.fetchSpeed');
 Route::post('/assets/ajax/get-engine-data', [TripsController::class, 'fetchEngine'])->name('admin.fetchEngine');
 Auth::routes();
-
-
 Route::get('/home', [HomeController::class, 'index'])->name('home');
-
 
 Route::group(['middleware' => ['auth']], function () {
    
@@ -66,30 +45,18 @@ Route::group(['middleware' => ['auth']], function () {
     Route::middleware(['auth', 'isAdmin'])->group(function () {
         Route::get('admin', [AdminController::class, 'dashboard'])->name('dashboard');
 		Route::get('/admin/conn', [AdminController::class, 'conn'])->name('conn');
-		
         Route::get('/admin/setting', [AdminController::class, 'setting'])->name('setting');
         Route::post('/admin/edit_setting', [AdminController::class, 'editSetting'])->name('settings.edit');
-
         Route::get('add_to_settings/{upload_id}', [AdminController::class, 'addToSettings'])->name('add_to_settings');
         //manage master users
         Route::resource('masters', ManageMastersController::class);
-
         Route::resource('boats', BoatController::class);
-
         Route::get('get_admins', [BoatController::class, 'allAdmins'])->name('get_admins');
-
         Route::get('my-trips', [TripsController::class, 'myTrips'])->name('admin.myTrips');
-        
-        
-
         Route::get('get_assigned_admin/{boat_id}', [BoatController::class, 'getAssignedAdmin'])->name('get_assigned_admin');
-        
-
         Route::post('assign_boat', [BoatController::class, 'assignBoat'])->name('assign_boat');
-
         Route::get('all_user_boats', [UserBoatController::class, 'allUserBoats'])->name('admin.userboats');
         Route::get('delete_user_boat/{id}', [UserBoatController::class, 'delUserBoat'])->name('delete_user_boat');
-        
         Route::post('update_boat', [BoatController::class, 'updateBoat'])->name('update_boat');
 
     });
@@ -104,27 +71,22 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('delete_file/{boat_id}', [BoatController::class, 'deleteFile'])->name('delete_file');
     Route::get('delete_boat_data/{data_id}', [TripsController::class, 'deleteBoatData'])->name('delete_boat_data');
     Route::resource('users', ManageUserController::class);
-
     Route::get('load-calendar', [TripsController::class, 'loadCalendar'])->name('admin.loadCalendar');
-
     Route::get('get_users', [BoatController::class, 'allUsers'])->name('get_users');
     Route::get('get_assigned_user/{boat_id}', [BoatController::class, 'getAssignedUser'])->name('get_assigned_user');
     Route::post('assign_boat_to_user', [BoatController::class, 'assignBoatToUser'])->name('assign_boat_to_user');
     //Master user routes
     Route::middleware(['auth', 'isMasterUser'])->group(function () {
         Route::get('master', [MasterUserController::class, 'dashboard'])->name('master.dashboard');
-		Route::get('/master/conn', [MasterUserController::class, 'conn'])->name('master.conn');	
+		Route::get('/master/conn', [MasterUserController::class, 'masterconn'])->name('master.conn');	
         Route::get('/master/setting', [MasterUserController::class, 'setting'])->name('master.setting');
         Route::post('/master/edit_setting', [MasterUserController::class, 'editSetting'])->name('master.settings.edit');
-        
         Route::get('edit_master_boat/{boat_id}', [BoatController::class, 'editMasterBoat'])->name('master_boats.edit');
         Route::get('master_boats', [BoatController::class, 'masterBoats'])->name('master_boats');
         Route::post('master_update_boat', [BoatController::class, 'masterUpdateBoat'])->name('master_update_boat');
-        
         Route::get('master/all_user_boats', [UserBoatController::class, 'MasterAllUserBoats'])->name('master.userboats');
         Route::get('master/delete_user_boat/{id}', [UserBoatController::class, 'MasterDelUserBoat'])->name('master.delete_user_boat');
-
-        Route::get('master/my-trips', [TripsController::class, 'masterTrips'])->name('master.myTrips');
+       Route::get('master/my-trips', [TripsController::class, 'masterTrips'])->name('master.myTrips');
     });
 
     //User routes
@@ -132,10 +94,8 @@ Route::group(['middleware' => ['auth']], function () {
 	Route::get('/user/conn', [UserController::class, 'conn'])->name('user.conn');	
     Route::get('/user/setting', [UserController::class, 'setting'])->name('user.setting');
     Route::post('/user/edit_setting', [UserController::class, 'editSetting'])->name('user.settings.edit');
-
     Route::get('user/boats', [UserBoatController::class, 'userBoats'])->name('user.userboats');
     Route::get('user/delete_boat/{id}', [UserBoatController::class, 'delBoat'])->name('user.delete_boat');
-
     Route::get('user/my-trips', [TripsController::class, 'userTrips'])->name('user.myTrips');
     
 });

@@ -94,8 +94,89 @@
     </div> 
 
 </div>
+<div class="w-100 pt-2">
+    <h4 class="mb-sm-0 font-size-16">Recent Connections</h4>
+    <div class="row justify-content-center">
+        <div class="col-md-12 mt-2">
+            <div class="card p-2 rounded cShadow table-responsive">
+                <table id="masteruploadlog" class="table table-bordered  table-hover dt-responsive display nowrap">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Device ID</th>
+                            <th>IP</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Rows+</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script>
+
+    
+        var table = $('#masteruploadlog').DataTable({
+
+        responsive: true,
+        serverSide: true,
+        searching: false,
+        ajax: {
+                url: '{{ route('master.conn') }}',
+                type: 'GET',
+                dataType: 'JSON',
+                accepts: 'JSON',
+                dom: 'frtip',
+                data: function(d) {
+                    d.page = (d.start / d.length) + 1;
+                    
+                },
+                beforeSend: function() {},
+                dataSrc: function(response) {
+                return response.data;
+                }
+            },
+
+        columns: [{
+                data: 'id',
+                name: 'id'
+            },
+            {
+                data: 'device_id',
+                name: 'device_id',
+            },
+            {
+                data: 'ip_address',
+                name: 'ip_address',
+            },
+            {
+                data: 'uload_time',
+                name: 'uload_time',
+            },   
+{
+                data: 'upload_status',
+                name: 'upload_status',
+            },        
+{
+                data: 'db_ok',
+                name: 'db_ok',
+            },        			
+
+        ]
+    });
+    
+
+</script>
 
 @endsection
