@@ -209,28 +209,41 @@
                     <table id="data" class="display table table-bordered  table-hover dt-responsive display nowrap">
                         <thead>
                             <tr>
+                                <th style="min-width:30px;max-width:30px;"></th>    
                                 <th style="min-width:50px;max-width:50px;">Time (UTC)</th>
                                 <th style="">Vessel <br />Position</th>
                                 <th style="min-width:55px;max-width:55px;">SOG</th>
                                 <th style="min-width:60px;max-width:60px;">COG</th>
                                 <th style="min-width:50px;max-width:50px;">Depth</th>
                                 <th style="min-width:65px;max-width:65px;">Heading</th>
-                                <th style="min-width:50px;max-width:50px;">Speed</th>
-                                <th style="min-width:70px;max-width:70px;">Port RPM</th>
+                                <th style="min-width:70px;max-width:70px;">App Wind</th>
+								<th style="min-width:65px;max-width:65px;">Pitch</th>
+								<th style="min-width:65px;max-width:65px;">Roll</th>
+								<th style="min-width:50px;max-width:50px;">Speed</th>
+                                <th style="min-width:50px;max-width:50px;">Tank1</th>
+								<th style="min-width:50px;max-width:50px;">Tank2</th>
+								<th style="min-width:50px;max-width:50px;">Tank3</th>
+								<th style="min-width:50px;max-width:50px;">Tank4</th>
+								<th style="min-width:70px;max-width:70px;">Port RPM</th>
                                 <th style="min-width:75px;max-width:75px;">Port Fuel Rate</th>
                                 <th style="min-width:70px;max-width:70px;">Stb RPM</th>
                                 <th style="min-width:75px;max-width:75px;">Stb Fuel Rate</th>
-                                <th style="min-width:70px;max-width:70px;">App Wind</th>
-                                <th style="min-width:70px;max-width:70px;">Action</th>
+                                
                             </tr>
                         </thead>
                         <tbody id="trip-data-table-body">
                             <tr>
+                            <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
-                                <td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -812,19 +825,26 @@
                         "pageLength": 10,
                         data: data, // Assign the received data directly
                         columns: [
+                            { data: 'delete_button' },
                             { data: 'utc' },
                             { data: 'location' },
                             { data: 'sog' },
                             { data: 'cog' },
                             { data: 'depth' },
                             { data: 'heading' },
+                            { data: 'awa' },
+                            { data: 'pitch' },
+                            { data: 'roll' },
                             { data: 'speed' },
+                            { data: 'tank1' },
+                            { data: 'tank2' },
+                            { data: 'tank3' },
+                            { data: 'tank4' },
                             { data: 'rpm1' },
                             { data: 'fuelr1' },
                             { data: 'rpm2' },
                             { data: 'fuelr2' },
-                            { data: 'awa' },
-                            { data: 'delete_button' },
+                            
                         ]
                     });
                     
@@ -1019,28 +1039,56 @@
                                 scales: "scaleX,scaleY",
                                 values: data.myRPM1, 
                                 decimals: 0,
-                                text: 'RPM',     
+                                text: 'RPM Port',     
+                            },   
+                            {   
+                                scales: "scaleX,scaleY",
+                                values: data.myRPM2, 
+                                decimals: 0,
+                                visible: false,
+                                text: 'RPM Stb',     
                             },   
                             {
                                 scales: "scaleX,scaleY3",
                                 values: data.myBOOST1, 
                                 decimals: 1,
                                 visible: false,
-                                text: 'Boost Pressure',     
+                                text: 'Boost Port',     
+                            },  
+                            {
+                                scales: "scaleX,scaleY3",
+                                values: data.myBOOST2, 
+                                decimals: 1,
+                                visible: false,
+                                text: 'Boost Stb',     
                             },   
                             {
                                 scales: "scaleX,scaleY4",
                                 values: data.myFUELR1, 
                                 decimals: 1,
                                 visible: false,
-                                text: 'Fuel Rate',     
+                                text: 'Fuel Rate Port',     
                             },    
+                            {
+                                scales: "scaleX,scaleY4",
+                                values: data.myFUELR2, 
+                                decimals: 1,
+                                visible: false,
+                                text: 'Fuel Rate Stb',     
+                            },  
                             {        
                                 scales: "scaleX,scaleY2",
                                 values: data.myLOAD1,  
                                 decimals: 1,
                                 visible: false,
-                                text: 'Engine Load'     
+                                text: 'Engine Load Port'     
+                            }, 
+                            {        
+                                scales: "scaleX,scaleY2",
+                                values: data.myLOAD2,  
+                                decimals: 1,
+                                visible: false,
+                                text: 'Engine Load Stb'     
                             }, 
                             {       
                                 scales: "scaleX,scaleY2",
@@ -1052,14 +1100,28 @@
                                 scales: "scaleX,scaleY5",
                                 values: data.myECON1,   
                                 decimals: 1,
-                                text: 'Litres per NM',     
+                                visible: false,
+                                text: 'Litres per NM Port',     
+                            }, 
+                            {       
+                                scales: "scaleX,scaleY5",
+                                values: data.myECON2,   
+                                decimals: 1,
+                                visible: false,
+                                text: 'Litres per NM Stb',     
                             }, 
                             {       
                                 scales: "scaleX,scaleY3",
                                 values: data.myCOOLT1,  
                                 decimals: 1,
+                                text: 'Coolant Temp Port',     
+                            },
+                            {       
+                                scales: "scaleX,scaleY3",
+                                values: data.myCOOLT2,  
+                                decimals: 1,
                                 visible: false, 
-                                text: 'Coolant Temp',     
+                                text: 'Coolant Temp Stb',     
                             }
                         ]
                     }]

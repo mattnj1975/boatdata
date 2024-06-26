@@ -78,7 +78,7 @@ class AdminController extends Controller
 					
 			$query = DB::table('uploadlog')
 					->select('uploadlog.id', 'uploadlog.device_id', 'uploadlog.ip_address', 'uploadlog.uload_time', 'uploadlog.upload_status', 'uploadlog.db_ok')
-					//->join('settings', 'settings.mac', '=', 'uploadlog.device_id')
+					//->join('settings', 'uploadlog.device_id', '=', 'settings.mac' )
 					
 					->orderBy('uploadlog.uload_time', 'desc')
                     ->latest();

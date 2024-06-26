@@ -51,6 +51,8 @@ class HomeController extends Controller
                 ->leftJoin('users', 'users.id', '=', 'user_boats.user_id')
                 ->where('users.email', $request->id)
                 ->where('val', 'A')
+                ->where('utc', '!=' , '00:00:00')
+                ->whereTime('utc', '<=', '24:00:00')
                 ->where('settings.public', 1)
                 ->whereNotNull('user_boats.id')
                 ->groupBy('settings.boatname', 'boatdata.mac', 'boatdata.date')
@@ -73,6 +75,8 @@ class HomeController extends Controller
                 ->leftJoin('users', 'users.id', '=', 'admin_boats.user_id')
                 ->where('users.email', $request->id)
                 ->where('val', 'A')
+                ->where('utc', '!=' , '00:00:00')
+                ->whereTime('utc', '<=', '24:00:00')
                 ->where('settings.public', 1)
                 ->whereNotNull('admin_boats.id')
                 ->groupBy('settings.boatname', 'boatdata.mac', 'boatdata.date')
@@ -95,6 +99,8 @@ class HomeController extends Controller
             )
             ->leftJoin('settings', 'settings.mac', '=', 'boatdata.mac')
             ->where('val', 'A')
+            ->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
             ->where('boatdata.mac', $request->mac) // Filter by the specific MAC address
             ->where('settings.public', 1) // Ensure settings are public
             ->groupBy('settings.boatname', 'boatdata.mac', 'boatdata.date')
@@ -123,6 +129,8 @@ class HomeController extends Controller
             )
             ->leftJoin('settings', 'settings.mac', '=', 'boatdata.mac')
             ->where('val', 'A')
+            ->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
             ->where('boatdata.mac', $request->mac) // Filter by the specific MAC address
             ->where('settings.public', 1) // Ensure settings are public
             ->groupBy('settings.boatname', 'boatdata.mac', 'boatdata.date')
@@ -146,6 +154,8 @@ class HomeController extends Controller
                 ->leftJoin('users', 'users.id', '=', 'user_boats.user_id')
                 ->where('users.email', $request->mac)
                 ->where('val', 'A')
+                ->where('utc', '!=' , '00:00:00')
+			    ->whereTime('utc', '<=', '24:00:00')
                 ->where('settings.public', 1)
                 ->whereNotNull('user_boats.id')
                 ->groupBy('settings.boatname', 'boatdata.mac', 'boatdata.date')
@@ -167,6 +177,8 @@ class HomeController extends Controller
                 ->leftJoin('users', 'users.id', '=', 'admin_boats.user_id')
                 ->where('users.email', $request->mac)
                 ->where('val', 'A')
+                ->where('utc', '!=' , '00:00:00')
+			    ->whereTime('utc', '<=', '24:00:00')
                 ->where('settings.public', 1)
                 ->whereNotNull('admin_boats.id')
                 ->groupBy('settings.boatname', 'boatdata.mac', 'boatdata.date')

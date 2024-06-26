@@ -21,4 +21,6 @@ class Uploadlog extends Model
         'db_ok',
         'db_err'
     ];
+	
+
 }

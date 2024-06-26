@@ -110,7 +110,11 @@ class BoatController extends Controller
     {
         if ($request->ajax()) {
 
-            $query = AdminBoats::with('boat')->where('user_id', Auth::id())->latest();
+            $query = AdminBoats::with('boat')
+            ->where('user_id', Auth::id())
+            ->latest();
+
+            
             // Original unfiltered total count
             $totalRecords = AdminBoats::where('user_id', Auth::id())->count();
 
@@ -135,7 +139,7 @@ class BoatController extends Controller
             foreach ($data as $item) {
                 $item->boatname = $item->boat->boatname ?? '';
                 $item->mac = $item->boat->mac ?? '';
-                $item->default_interval = $item->boat->default_interval ?? '';
+                //$item->default_interval = $item->boat->default_interval ?? '';
                 $item->device_id = $item->boat->device_id ?? '';
                 $item->lastseen = $item->boat->lastseen ?? '';
                 $item->version = $item->boat->version ?? '';

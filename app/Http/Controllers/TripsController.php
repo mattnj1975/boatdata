@@ -22,6 +22,8 @@ class TripsController extends Controller
         // GET TRIPS FOR CURRENT MONTH AND ADD TO CALENDAR
         $tripDays = BoatData::select('mac', 'date')
             ->where('val', 'A')
+            ->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
             ->distinct()
             ->get();
 
@@ -39,6 +41,8 @@ class TripsController extends Controller
             ->leftJoin('settings', 'settings.mac', '=', 'boatdata.mac')
             ->whereBetween('boatdata.date', [$monthStart, $monthEnd])
             ->where('val', 'A')
+            ->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
             ->groupBy('settings.boatname', 'boatdata.mac', 'boatdata.date') // Include Settings.boatname in GROUP BY
             ->get();
 
@@ -52,7 +56,9 @@ class TripsController extends Controller
         $date = $request->date ? date('Y-m-d', strtotime($request->date)) : date('Y-m-d');
 
         $calendar = new Calendar($date);
-        $tripDays = BoatData::where('val', 'A')->distinct()->get(['mac', 'date']);
+        $tripDays = BoatData::where('val', 'A')
+        ->distinct()
+        ->get(['mac', 'date']);
         foreach ($tripDays as $info) {
             $calendar->add_event($info->mac, $info->date, 1, 'blue');
         }
@@ -73,6 +79,8 @@ class TripsController extends Controller
             ->join('admin_boats', 'admin_boats.boat_id', '=', 'settings.id')
             ->where('admin_boats.user_id', '=', Auth::id())
             ->where('val', 'A')
+            ->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
             ->distinct()
             ->get();
 
@@ -92,6 +100,8 @@ class TripsController extends Controller
             ->where('admin_boats.user_id', '=', Auth::id())
             ->whereBetween('boatdata.date', [$monthStart, $monthEnd])
             ->where('val', 'A')
+            ->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
             ->groupBy('settings.boatname', 'boatdata.mac', 'boatdata.date')
             ->get();
 
@@ -113,6 +123,9 @@ class TripsController extends Controller
             ->join('user_boats', 'user_boats.boat_id', '=', 'settings.id')
             ->where('user_boats.user_id', '=', Auth::id())
             ->where('val', 'A')
+            ->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
+            
             ->distinct()
             ->get();
 
@@ -132,6 +145,8 @@ class TripsController extends Controller
             ->where('user_boats.user_id', '=', Auth::id())
             ->whereBetween('boatdata.date', [$monthStart, $monthEnd])
             ->where('val', 'A')
+            ->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
             ->groupBy('settings.boatname', 'boatdata.mac', 'boatdata.date')
             ->get();
 
@@ -189,47 +204,65 @@ class TripsController extends Controller
             'startTime' => BoatData::where('date', $date)
                 ->where('mac', $mac)
                 ->where('val', 'A')
+                ->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
                 ->orderBy('datetime', 'asc')
                 ->first(),
             'endTime' => BoatData::where('date', $date)
                 ->where('mac', $mac)
                 ->where('val', 'A')
+                ->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
                 ->orderBy('datetime', 'desc')
                 ->first(),
             'distance' => BoatData::where('date', $date)
                 ->where('mac', $mac)
                 ->where('val', 'A')
+                ->where('utc', '!=' , '00:00:00')
+                ->whereTime('utc', '<=', '24:00:00')
                 ->orderBy('dist', 'desc')
                 ->first()->dist,
             'gpsdist' => BoatData::where('date', $date)
                 ->where('mac', $mac)
                 ->where('val', 'A')
+                ->where('utc', '!=' , '00:00:00')
+                ->whereTime('utc', '<=', '24:00:00')
                 ->orderBy('dog', 'desc')
                 ->first()->dog,
             'speed' => BoatData::where('date', $date)
                 ->where('mac', $mac)
                 ->where('val', 'A')
+                ->where('utc', '!=' , '00:00:00')
+                ->whereTime('utc', '<=', '24:00:00')
                 ->orderBy('spd', 'desc')
                 ->first(),
             'sog' => BoatData::where('date', $date)
                 ->where('mac', $mac)
                 ->where('val', 'A')
+                ->where('utc', '!=' , '00:00:00')
+                ->whereTime('utc', '<=', '24:00:00')
                 ->orderBy('sog', 'desc')
                 ->first(),
             'minDepth' => BoatData::where('date', $date)
                 ->where('mac', $mac)
                 ->where('dep', '>', 0)
                 ->where('val', 'A')
+                ->where('utc', '!=' , '00:00:00')
+                ->whereTime('utc', '<=', '24:00:00')
                 ->orderBy('dep', 'asc')
                 ->first(),
             'awind' => BoatData::where('date', $date)
                 ->where('mac', $mac)
                 ->where('val', 'A')
+                ->where('utc', '!=' , '00:00:00')
+                ->whereTime('utc', '<=', '24:00:00')
                 ->orderBy('aws', 'desc')
                 ->first(),
             'twind' => BoatData::where('date', $date)
                 ->where('mac', $mac)
                 ->where('val', 'A')
+                ->where('utc', '!=' , '00:00:00')
+                ->whereTime('utc', '<=', '24:00:00')
                 ->orderBy('tws', 'desc')
                 ->first(),
         ];
@@ -330,12 +363,20 @@ class TripsController extends Controller
         foreach ($dataPoints as $info) {
             $rowData = [
                 'utc' => $info->utc,
-                'location' => number_format($info->lat, 4, '.', ',') . $info->ns . ', ' . number_format($info->lon, 4, '.', ',') . $info->ew,
+                //'location' => number_format($info->lat, 4, '.', ',') . $info->ns . ', ' . number_format($info->lon, 4, '.', ',') . $info->ew,
+                'location' => $info->latdec .  ' ' . $info->londec,
                 'sog' => ($info->sog == NULL) ? "-" : round($info->sog, 1) . "kts",
                 'cog' => ($info->cog == NULL) ? "-" : $info->cog . "&deg",
                 'depth' => ($info->dep == NULL) ? "-" : $info->dep . "m",
                 'heading' => ($info->hdg == NULL) ? "-" : $info->hdg . "&deg",
+                'pitch' => ($info->pitch == NULL) ? "-" : $info->pitch . "&deg",
+                'roll' => ($info->roll == NULL) ? "-" : $info->roll . "&deg",
                 'speed' => ($info->spd == NULL) ? "-" : $info->spd . "kts",
+                'tank1' => ($info->tank1 == NULL) ? "-" : $info->tank1 . "%",
+                'tank2' => ($info->tank2 == NULL) ? "-" : $info->tank2 . "%",
+                'tank3' => ($info->tank3 == NULL) ? "-" : $info->tank3 . "%",
+                'tank4' => ($info->tank4 == NULL) ? "-" : $info->tank4 . "%",
+
                 'rpm1' => ($info->rpm1 == NULL) ? "-" : $info->rpm1,
                 'fuelr1' => ($info->fuelr1 == NULL) ? "-" : $info->fuelr1 . "l/hr",
                 'rpm2' => ($info->rpm2 == NULL) ? "-" : $info->rpm2,
@@ -512,6 +553,20 @@ class TripsController extends Controller
             ->map(function ($item) {
                 return [round($item->ep_utc), (float) $item->rpm1];
             });
+        $myRPM2 = DB::table('boatdata')
+            ->select(DB::raw('AVG(rpm2) as rpm2'), 
+                    DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
+            ->where('mac', $uid)
+			->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
+            ->whereNotNull('rpm2')
+            ->whereBetween('date', [$start, $end])
+            ->groupBy('ep_utc')
+            ->limit(2000)
+            ->get()
+            ->map(function ($item) {
+                return [round($item->ep_utc), (float) $item->rpm2];
+            });
         
         // Fetch data from the database for myBOOST1
         $myBOOST1 = DB::table('boatdata')
@@ -528,6 +583,22 @@ class TripsController extends Controller
             ->map(function ($item) {
                 return [round($item->ep_utc), $item->boost1];
             });
+
+                   // Fetch data from the database for myBOOST2
+        $myBOOST2 = DB::table('boatdata')
+        ->select(DB::raw('AVG(boost2) as boost2'), 
+                 DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
+        ->where('mac', $uid)
+        ->where('utc', '!=' , '00:00:00')
+        ->whereTime('utc', '<=', '24:00:00')
+        ->whereNotNull('boost2')
+        ->groupBy('ep_utc')
+        ->whereBetween('date', [$start, $end])
+        ->limit(2000)
+        ->get()
+        ->map(function ($item) {
+            return [round($item->ep_utc), $item->boost2];
+        });
          
         $myFUELR1 = DB::table('boatdata')
             ->select(DB::raw('AVG(fuelr1) as fuelr1'), 
@@ -544,6 +615,24 @@ class TripsController extends Controller
                 //return [round($item->ep_utc), number_format($item->fuelr1, 2)];
 				return [round($item->ep_utc), (float) $item->fuelr1];
             });
+
+            $myFUELR2 = DB::table('boatdata')
+            ->select(DB::raw('AVG(fuelr2) as fuelr2'), 
+                     DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
+            ->where('mac', $uid)
+			->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
+            ->where('fuelr2', '!=', NULL)
+            ->groupBy('ep_utc')
+            ->whereBetween('date', [$start, $end])
+            ->limit(2000)
+            ->get()
+            ->map(function ($item) {
+                //return [round($item->ep_utc), number_format($item->fuelr1, 2)];
+				return [round($item->ep_utc), (float) $item->fuelr2];
+            });
+
+
             // dd($myFUELR1);
         // Fetch data from the database for myLOAD1
         $myLOAD1 = DB::table('boatdata')
@@ -559,6 +648,21 @@ class TripsController extends Controller
             ->get()
             ->map(function ($item) {
                 return [round($item->ep_utc), number_format($item->load1, 1)];
+            });
+
+            $myLOAD2 = DB::table('boatdata')
+            ->select(DB::raw('AVG(load2) as load2'), 
+                    DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
+            ->where('mac', $uid)
+			->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
+            ->whereNotNull('load2')
+            ->groupBy('ep_utc')
+            ->whereBetween('date', [$start, $end])
+            ->limit(2000)
+            ->get()
+            ->map(function ($item) {
+                return [round($item->ep_utc), number_format($item->load2, 1)];
             });
 
    
@@ -593,6 +697,22 @@ class TripsController extends Controller
                 return [round($item->ep_utc), number_format($item->coolt1, 2)];
             });
 
+                    // Fetch data from the database for myCOOLT2
+        $myCOOLT2 = DB::table('boatdata')
+        ->select(DB::raw('AVG(coolt2) as coolt2'), 
+                 DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
+        ->where('mac', $uid)
+        ->where('utc', '!=' , '00:00:00')
+        ->whereTime('utc', '<=', '24:00:00')
+        ->whereNotNull('coolt2')
+        ->groupBy('ep_utc')
+        ->whereBetween('date', [$start, $end])
+        ->limit(2000)
+        ->get()
+        ->map(function ($item) {
+            return [round($item->ep_utc), number_format($item->coolt2, 2)];
+        });
+
         // Fetch data from the database for myECON1
         $myECON1 = DB::table('boatdata')
             ->select(DB::raw('AVG(eng1_econ) as eng1_econ'),  DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
@@ -609,16 +729,35 @@ class TripsController extends Controller
                 //return [round($item->ep_utc), number_format($item->eng1_econ, 2)];
 				return [round($item->ep_utc), (float) $item->eng1_econ];
             });
+
+            $myECON2 = DB::table('boatdata')
+            ->select(DB::raw('AVG(eng2_econ) as eng2_econ'),  DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
+            ->where('mac', $uid)
+			->where('utc', '!=' , '00:00:00')
+			->whereTime('utc', '<=', '24:00:00')
+            ->where('sog', '>', 2)
+            ->where('eng2_econ', '>', 0)
+            ->groupBy('ep_utc')
+            ->whereBetween('date', [$start, $end])
+            ->limit(2000)
+            ->get()
+            ->map(function ($item) {
+                //return [round($item->ep_utc), number_format($item->eng1_econ, 2)];
+				return [round($item->ep_utc), (float) $item->eng2_econ];
+            });
         // Repeat the same process for other variables...
         
         // Prepare data for JSON response
         $data = [
             'myRPM1' => $myRPM1,
+            'myRPM2' => $myRPM2,
             'myBOOST1' => $myBOOST1,
+            'myBOOST2' => $myBOOST2,
             'myFUELR1' => $myFUELR1,
             'myLOAD1' => $myLOAD1,
             'mySOG' => $mySOG,
             'myCOOLT1' => $myCOOLT1,
+            'myCOOLT2' => $myCOOLT2,
             'myECON1' => $myECON1,
             // Add other variables here
         ];

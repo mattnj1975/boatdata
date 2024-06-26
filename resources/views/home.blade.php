@@ -313,7 +313,7 @@
                 var tripDate = new Date(item.TripDate);
                 var formattedTripDate = ('0' + tripDate.getDate()).slice(-2) + '/' + ('0' + (tripDate.getMonth() + 1)).slice(-2) + '/' + tripDate.getFullYear();
                 tableHTML += '<tr>';
-                tableHTML += '<td><div class="d-flex btn-group-lg" role="group" ><i style="cursor: pointer;" class="fa fa-solid fa-map viewLink viewTrack" title="Click here then scroll down"></i></div></td>';
+                tableHTML += '<td><div class="d-flex btn-group-lg" role="group" ><i style="cursor: pointer;" class="fa fa-solid fa-map viewLink viewTrack" title="Click here then scroll down"></i><br><i style="cursor: pointer;" class="fa fa-solid fa-table viewLink viewData" title="Click here then scroll down"></i></div></td>';
                 tableHTML += '<td>' + item.boatname + ' </br>(<small data-mac="' + item.mac + '">' + item.mac + '</small>)</td>';
                 tableHTML += '<td data-date="' + formattedTripDate + '">' + formattedTripDate + '</td>';
                 tableHTML += '<td>' + (item.Begin ? item.Begin : 'N/A') + '</td>';
@@ -858,8 +858,7 @@
                     scales: "scaleX,scaleY2",
                     values: data.mySOG,  
                     decimals: 1,
-                    visible: false,
-                    text: 'Speed Over Ground'     
+                     text: 'Speed Over Ground'     
                     },
                     {       
                     // Plot 4 values, linear data     
@@ -915,7 +914,7 @@
                             shared: true
                         },
                         title: {
-                            text: 'Engine 1 Data',
+                            text: 'Engine Data',
                             fontSize: 16,
                         },
                         legend: {

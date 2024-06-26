@@ -278,8 +278,8 @@
                         '</td>' +
                             '<td>' + item['boatname'] + ' <br> (<small data-mac="' + item['mac'] + '">' + item['mac'] + '</small>)</td>' +
                             '<td data-date="' + formattedTripDate + '">' + formattedTripDate + '</td>' +
-                            '<td>' + (item['Begin'] ? item['Begin'] : 'N/A') + '</td>' +
-                            '<td>' + (item['Finish'] ? item['Finish'] : 'N/A') + '</td>';
+                            '<td>' + (item['Begin'] ? item['Begin'] : 'na') + '</td>' +
+                            '<td>' + (item['Finish'] ? item['Finish'] : 'na') + '</td>';
 
                 if (item['Begin'] && item['Finish']) {
                     var beginTime = new Date(item['TripDate'] + ' ' + item['Begin']);
@@ -290,10 +290,10 @@
                     var duration = hours + 'h ' + minutes + 'm';
                     row += '<td>' + duration + '</td>';
                 } else {
-                    row += '<td>N/A</td>';
+                    row += '<td>na</td>';
                 }
 
-                row += '<td>' + (item['Trip'] ? item['Trip'] : 'N/A') + '</td>' +
+                row += '<td>' + (item['Trip'] ? item['Trip'] : 'na') + '</td>' +
                         '</tr>';
 
                 tableBody.innerHTML += row;
@@ -830,7 +830,6 @@
                     scales: "scaleX,scaleY2",
                     values: data.mySOG,  
                     decimals: 1,
-                    visible: false,
                     text: 'Speed Over Ground'     
                     },
                     {       
