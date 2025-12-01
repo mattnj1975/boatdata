@@ -38,40 +38,43 @@
     </div>
 
 
-    <div class="row justify-content-center">
-        <div class="col-10">
-            <div class="card">
-                <div class="card-header  text-center text-white" style="background-color: black;">
-
-                    <b>Search Boat</b>
-                </div>
-
-                <div class="card-body">
-                    <form id="searchForm" action="{{ route('search.mac') }}" method="post">
-                        @csrf
-                        <div class="row">
-                            <div class="col-lg-10 col-md-10 col-sm-6">
-                                <input style="outline: none; box-shadow: none;" required type="text" name="mac" class="form-control" placeholder="Search by mac or by email address ... ">
-                            </div>
-                            <div class="col-lg-2 col-md-2 col-sm-6">
-                                <button id="searchButton" type="submit" class="btn btn-outline-success">Search</button>
-                            </div>
-                        </div>
-                    </form>
-                    <div class="pt-4" id="searchResults"></div>
-                    <div class="row justify-content-between">
-                        <div class="col-auto">
-                            <div id="paginationContainer"></div>
-                        </div>
-                        <div class="col-auto">
-                            <div id="entryCount"></div>
-                        </div>
-                    </div> 
-                </div>
-            
+<div class="row justify-content-center">
+    <div class="col-10">
+        <div class="card">
+            <div class="card-header text-center text-white" style="background-color: black;">
+                <b>Search Boat</b>
             </div>
+
+            <div class="card-body">
+                <form id="searchForm" action="{{ route('search.mac') }}" method="post">
+                    @csrf
+                    <div class="row align-items-center">
+                        <div class="col-lg-10 col-md-10 col-sm-6">
+                            <input style="outline: none; box-shadow: none;" required type="text" name="mac" class="form-control" placeholder="Search by mac or by email address ... ">
+                        </div>
+                        <div class="col-lg-1 col-md-1 col-sm-3">
+                            <button id="searchButton" type="submit" class="btn btn-outline-success">Search</button>
+                        </div>
+                        <div class="col-lg-1 col-md-1 col-sm-3">
+                            <a href="../view" class="btn btn-outline-danger" style="padding: 6px 10px; font-weight: bold; font-size: 18px; line-height: 1; display: inline-flex; justify-content: center; align-items: center;">&times;</a>
+                        </div>
+                    </div>
+                </form>
+                <div class="pt-4" id="searchResults"></div>
+                <div class="row justify-content-between">
+                    <div class="col-auto">
+                        <div id="paginationContainer"></div>
+                    </div>
+                    <div class="col-auto">
+                        <div id="entryCount"></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
+</div>
+
     
          
 </div>
@@ -209,10 +212,6 @@
                                 <th style="min-width:50px;max-width:50px;">Depth</th>
                                 <th style="min-width:65px;max-width:65px;">Heading</th>
                                 <th style="min-width:50px;max-width:50px;">Speed</th>
-                                <th style="min-width:70px;max-width:70px;">Port RPM</th>
-                                <th style="min-width:75px;max-width:75px;">Port Fuel Rate</th>
-                                <th style="min-width:70px;max-width:70px;">Stb RPM</th>
-                                <th style="min-width:75px;max-width:75px;">Stb Fuel Rate</th>
                                 <th style="min-width:70px;max-width:70px;">App Wind</th>
                             </tr>
                         </thead>
@@ -314,8 +313,8 @@
                 var formattedTripDate = ('0' + tripDate.getDate()).slice(-2) + '/' + ('0' + (tripDate.getMonth() + 1)).slice(-2) + '/' + tripDate.getFullYear();
                 tableHTML += '<tr>';
                 tableHTML += '<td><div class="d-flex btn-group-lg" role="group" ><i style="cursor: pointer;" class="fa fa-solid fa-map viewLink viewTrack" title="Click here then scroll down"></i><br><i style="cursor: pointer;" class="fa fa-solid fa-table viewLink viewData" title="Click here then scroll down"></i></div></td>';
-                tableHTML += '<td>' + item.boatname + ' </br>(<small data-mac="' + item.mac + '">' + item.mac + '</small>)</td>';
-                tableHTML += '<td data-date="' + formattedTripDate + '">' + formattedTripDate + '</td>';
+				tableHTML += '<td>' + item.boatname + ' </br>(<a href="/app/map/index.php?uid=' + item.mac + '" title="Click to show all trips"><small data-mac="' + item.mac + '">' + item.mac + '</small></a>)</td>';
+				tableHTML += '<td data-date="' + formattedTripDate + '">' + formattedTripDate + '</td>';
                 tableHTML += '<td>' + (item.Begin ? item.Begin : 'N/A') + '</td>';
                 tableHTML += '<td>' + (item.Finish ? item.Finish : 'N/A') + '</td>';
 
@@ -346,33 +345,78 @@
             document.getElementById('entryCount').innerHTML = 'Showing ' + fromIndex + ' to ' + toIndex + ' of ' + totalCount + ' entries';
         }
 
-        function renderPagination() {
-            var totalPages = Math.ceil(data.length / rowsPerPage);
-            var paginationHTML = '<nav aria-label="Page navigation"><ul class="pagination">';
-            
-            // Previous button
-            paginationHTML += '<li class="page-item ' + (currentPage === 1 ? 'disabled' : '') + '"><a class="page-link" href="#" data-page="' + (currentPage - 1) + '">Previous</a></li>';
-            
-            for (var i = 1; i <= totalPages; i++) {
-                paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
-            }
-            
-            // Next button
-            paginationHTML += '<li class="page-item ' + (currentPage === totalPages ? 'disabled' : '') + '"><a class="page-link" href="#" data-page="' + (currentPage + 1) + '">Next</a></li>';
-            
-            paginationHTML += '</ul></nav>';
-            document.getElementById('paginationContainer').innerHTML = paginationHTML;
+function renderPagination() {
+    var totalPages = Math.ceil(data.length / rowsPerPage);
 
-            // Add event listeners to pagination links
-            document.querySelectorAll('.pagination .page-link').forEach(function(link) {
-                link.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    currentPage = parseInt(this.getAttribute('data-page'));
-                    renderTable();
-                    renderPagination();
-                });
-            });
+    var paginationHTML = '<nav aria-label="Page navigation"><ul class="pagination">';
+
+    // Previous button
+    paginationHTML += '<li class="page-item ' + (currentPage === 1 ? 'disabled' : '') + 
+                      '"><a class="page-link" href="#" data-page="' + (currentPage - 1) + '">Previous</a></li>';
+
+    if (totalPages <= 20) {
+        // Show all pages if totalPages <= 20
+        for (var i = 1; i <= totalPages; i++) {
+            paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + 
+                              '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
         }
+    } else {
+        // Show first 3 pages always
+        for (var i = 1; i <= 3; i++) {
+            paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + 
+                              '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
+        }
+
+        // Ellipsis if currentPage > 5 (means pages hidden after 3)
+        if (currentPage > 5) {
+            paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+
+        // Pages around the current page
+        var startPage = Math.max(4, currentPage - 1);
+        var endPage = Math.min(totalPages - 3, currentPage + 1);
+
+        for (var i = startPage; i <= endPage; i++) {
+            if (i > 3 && i < totalPages - 2) {
+                paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + 
+                                  '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
+            }
+        }
+
+        // Ellipsis if currentPage < totalPages - 4 (means pages hidden before last 3)
+        if (currentPage < totalPages - 4) {
+            paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+
+        // Show last 3 pages always
+        for (var i = totalPages - 2; i <= totalPages; i++) {
+            paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + 
+                              '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
+        }
+    }
+
+    // Next button
+    paginationHTML += '<li class="page-item ' + (currentPage === totalPages ? 'disabled' : '') + 
+                      '"><a class="page-link" href="#" data-page="' + (currentPage + 1) + '">Next</a></li>';
+
+    paginationHTML += '</ul></nav>';
+
+    document.getElementById('paginationContainer').innerHTML = paginationHTML;
+
+    // Add event listeners to pagination links
+    document.querySelectorAll('.pagination .page-link').forEach(function(link) {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            var page = parseInt(this.getAttribute('data-page'));
+            if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderTable();
+                renderPagination();
+            }
+        });
+    });
+}
+
     });
 
 
@@ -902,7 +946,11 @@
                 end: date,
                 uid: mac
             }, function(data) {
-                console.log(data.myRPM1)
+                //console.log(data.myRPM1)
+				//console.log('myCOOLT1:', data.myCOOLT1);
+				console.log('myRPM1 sample:', data.myRPM1.slice(0, 100));
+    console.log('mySOG sample:', data.mySOG.slice(0, 100));
+    console.log('myLOAD1 sample:', data.myLOAD1.slice(0, 100));
                 let myConfig = {
                     graphset: [{
                         type: 'line',
@@ -914,7 +962,7 @@
                             shared: true
                         },
                         title: {
-                            text: 'Engine Data',
+                            text: 'Engine 1 Data',
                             fontSize: 16,
                         },
                         legend: {
@@ -937,13 +985,16 @@
                             label: { text: 'Boat Speed (kts)', visible: false }
                         },
                         scaleY3: {
-                            label: { text: 'Temp' }
-                        },
+                            label: { text: 'Boost' },
+							   },
                         scaleY4: {
                             label: { text: 'Fuel Rate', visible: false }
                         },
                         scaleY5: {
                             label: { text: 'Litres per NM', visible: false }
+                        },
+						scaleY6: {
+                            label: { text: 'Temp', minValue: 60, maxValue: 100,visible: false }
                         },
                         series: [
                             {   
@@ -952,6 +1003,13 @@
                                 decimals: 0,
                                 text: 'RPM',     
                             },   
+							{        
+                                scales: "scaleX,scaleY2",
+                                values: data.mySOG,  
+                                decimals: 1,
+                                visible: true,
+                                text: 'SOG'     
+                            }, 
                             {
                                 scales: "scaleX,scaleY3",
                                 values: data.myBOOST1, 
@@ -966,32 +1024,21 @@
                                 visible: false,
                                 text: 'Fuel Rate',     
                             },    
-                            {        
-                                scales: "scaleX,scaleY2",
-                                values: data.myLOAD1,  
-                                decimals: 1,
-                                visible: false,
-                                text: 'Engine Load'     
-                            }, 
-                            {       
-                                scales: "scaleX,scaleY2",
-                                values: data.mySOG,   
-                                decimals: 1,
-                                text: 'SOG',     
-                            }, 
+
                             {       
                                 scales: "scaleX,scaleY5",
-                                values: data.myECON1,   
+                                values: data.myECON1,  
+								visible: false,								
                                 decimals: 1,
-                                text: 'Litres per NM',     
+                                text: 'Econ',     
                             }, 
                             {       
-                                scales: "scaleX,scaleY3",
-                                values: data.myCOOLT1,  
-                                decimals: 1,
-                                visible: false, 
+                                scales: "scaleX,scaleY6",
+                                values: data.myCOOLT1,   
+                                decimals: 0,
                                 text: 'Coolant Temp',     
-                            }
+                            }, 
+                            
                         ]
                     }]
                 };

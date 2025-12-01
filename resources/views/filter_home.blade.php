@@ -27,47 +27,55 @@
     </div>
 
 
-    <div class="row justify-content-center">
-        <div class="col-10">
-            <div class="card">
-                <div class="card-header  text-center text-white" style="background-color: black;">
+<div class="row justify-content-center">
+    <div class="col-10">
+        <div class="card">
+            <div class="card-header text-white" style="background-color: black; display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem;">
 
-                    <b> Boat Trips </b>
-                </div>
+    <b>Boat Trips</b>
 
-                <div class="card-body">
-                    <div class="pt-4" id="searchResults">
-                        <table class="table   border-secondary  table-hover w-100 table-responsive table-bordered">
-                            <thead class="">
-                                <tr>
-									<th></th>
-                                    <th>Boat Name</th>
-                                    <th>Trip Date</th>
-                                    <th>Start</th>
-                                    <th>Finish</th>
-                                    <th>Duration</th>
-                                    <th>Distance</th>
-                                    
-                                </tr>
-                            </thead>
-                            <tbody id="tableBody">
+    <a href="../view" 
+       style="color: white; font-weight: bold; font-size: 1.5rem; text-decoration: none; cursor: pointer;" 
+       title="Back">
+        &times;
+    </a>
 
-                            </tbody>
+</div>
 
-                        </table>
-                        <div class="row justify-content-between">
-                            <div class="col-auto">
-                                <div id="paginationContainer"></div>
-                            </div>
-                            <div class="col-auto">
-                                <div id="entryCount"></div>
-                            </div>
-                        </div> 
-                    </div>
+
+            <div class="card-body">
+                <div class="pt-4" id="searchResults">
+                    <table class="table border-secondary table-hover w-100 table-responsive table-bordered">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Boat Name</th>
+                                <th>Trip Date</th>
+                                <th>Start</th>
+                                <th>Finish</th>
+                                <th>Duration</th>
+                                <th>Distance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+
+                        </tbody>
+
+                    </table>
+                    <div class="row justify-content-between">
+                        <div class="col-auto">
+                            <div id="paginationContainer"></div>
+                        </div>
+                        <div class="col-auto">
+                            <div id="entryCount"></div>
+                        </div>
+                    </div> 
                 </div>
             </div>
         </div>
     </div>
+</div>
+
 </div>
 
 <div class="container-fluid boat_details" id="boat_details">
@@ -276,7 +284,7 @@
                                 
                             '</div>' +
                         '</td>' +
-                            '<td>' + item['boatname'] + ' <br> (<small data-mac="' + item['mac'] + '">' + item['mac'] + '</small>)</td>' +
+                            '<td>' + item['boatname'] + ' <br> (<a href="/app/map/index.php?uid=' + item['mac'] + '"><small data-mac="' + item['mac'] + '">' + item['mac'] + '</small></a>)</td>' +
                             '<td data-date="' + formattedTripDate + '">' + formattedTripDate + '</td>' +
                             '<td>' + (item['Begin'] ? item['Begin'] : 'na') + '</td>' +
                             '<td>' + (item['Finish'] ? item['Finish'] : 'na') + '</td>';
@@ -303,38 +311,78 @@
             renderEntryCount();
         }
 
-        function renderPagination() {
-            var totalPages = Math.ceil(data.length / rowsPerPage);
-            var paginationContainer = document.getElementById('paginationContainer');
-            var paginationHTML = '';
+function renderPagination() {
+    var totalPages = Math.ceil(data.length / rowsPerPage);
 
-            if (totalPages > 1) {
-                paginationHTML += '<nav aria-label="Page navigation"><ul class="pagination">';
+    var paginationHTML = '<nav aria-label="Page navigation"><ul class="pagination">';
 
-                // Previous button
-                paginationHTML += '<li class="page-item ' + (currentPage === 1 ? 'disabled' : '') + '"><a class="page-link" href="#" data-page="' + (currentPage - 1) + '">Previous</a></li>';
+    // Previous button
+    paginationHTML += '<li class="page-item ' + (currentPage === 1 ? 'disabled' : '') + 
+                      '"><a class="page-link" href="#" data-page="' + (currentPage - 1) + '">Previous</a></li>';
 
-                for (var i = 1; i <= totalPages; i++) {
-                    paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
-                }
-
-                // Next button
-                paginationHTML += '<li class="page-item ' + (currentPage === totalPages ? 'disabled' : '') + '"><a class="page-link" href="#" data-page="' + (currentPage + 1) + '">Next</a></li>';
-
-                paginationHTML += '</ul></nav>';
-            }
-
-            paginationContainer.innerHTML = paginationHTML;
-
-            // Add event listeners to pagination links
-            document.querySelectorAll('.pagination .page-link').forEach(function(link) {
-                link.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    currentPage = parseInt(this.getAttribute('data-page'));
-                    renderTable();
-                });
-            });
+    if (totalPages <= 20) {
+        // Show all pages if totalPages <= 20
+        for (var i = 1; i <= totalPages; i++) {
+            paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + 
+                              '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
         }
+    } else {
+        // Show first 3 pages always
+        for (var i = 1; i <= 3; i++) {
+            paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + 
+                              '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
+        }
+
+        // Ellipsis if currentPage > 5 (means pages hidden after 3)
+        if (currentPage > 5) {
+            paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+
+        // Pages around the current page
+        var startPage = Math.max(4, currentPage - 1);
+        var endPage = Math.min(totalPages - 3, currentPage + 1);
+
+        for (var i = startPage; i <= endPage; i++) {
+            if (i > 3 && i < totalPages - 2) {
+                paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + 
+                                  '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
+            }
+        }
+
+        // Ellipsis if currentPage < totalPages - 4 (means pages hidden before last 3)
+        if (currentPage < totalPages - 4) {
+            paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+
+        // Show last 3 pages always
+        for (var i = totalPages - 2; i <= totalPages; i++) {
+            paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + 
+                              '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
+        }
+    }
+
+    // Next button
+    paginationHTML += '<li class="page-item ' + (currentPage === totalPages ? 'disabled' : '') + 
+                      '"><a class="page-link" href="#" data-page="' + (currentPage + 1) + '">Next</a></li>';
+
+    paginationHTML += '</ul></nav>';
+
+    document.getElementById('paginationContainer').innerHTML = paginationHTML;
+
+    // Add event listeners to pagination links
+    document.querySelectorAll('.pagination .page-link').forEach(function(link) {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            var page = parseInt(this.getAttribute('data-page'));
+            if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderTable();
+                renderPagination();
+            }
+        });
+    });
+}
+
 
         function renderEntryCount() {
             var totalCount = data.length;
@@ -479,7 +527,7 @@
 
                     console.log(coordinates)
 
-	osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+					osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
                     oSeamUrl='https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png';
 	                osmAttrib = 'Map data © <a href="http://openstreetmap.org">OpenSeaMap</a> contributors';
                     osm = new L.TileLayer(osmUrl, {
@@ -874,7 +922,12 @@
                 end: date,
                 uid: mac
             }, function(data) {
-                console.log(data.myRPM1)
+                //console.log(data.myRPM1)
+				//console.log('myCOOLT1:', data.myCOOLT1);
+				console.log('myRPM1 sample:', data.myRPM1.slice(0, 5));
+    console.log('mySOG sample:', data.mySOG.slice(0, 5));
+    console.log('myLOAD1 sample:', data.myLOAD1.slice(0, 5));
+				
                 let myConfig = {
                     graphset: [{
                         type: 'line',
@@ -903,19 +956,22 @@
                         },
                         scaleY: {
                             zooming: true,
-                            label: { text: 'RPM' }
+                            label: { text: 'RPM', minValue: 0, maxValue: 4000 }
                         },
                         scaleY2: {
                             label: { text: 'Boat Speed (kts)', visible: false }
                         },
                         scaleY3: {
-                            label: { text: 'Temp' }
-                        },
+                            label: { text: 'Boost' },
+							   },
                         scaleY4: {
                             label: { text: 'Fuel Rate', visible: false }
                         },
                         scaleY5: {
                             label: { text: 'Litres per NM', visible: false }
+                        },
+						scaleY6: {
+                            label: { text: 'Temp', minValue: 60, maxValue: 100,visible: false }
                         },
                         series: [
                             {   
@@ -924,6 +980,13 @@
                                 decimals: 0,
                                 text: 'RPM',     
                             },   
+							{        
+                                scales: "scaleX,scaleY2",
+                                values: data.mySOG,  
+                                decimals: 1,
+                                visible: true,
+                                text: 'SOG'     
+                            }, 
                             {
                                 scales: "scaleX,scaleY3",
                                 values: data.myBOOST1, 
@@ -938,32 +1001,21 @@
                                 visible: false,
                                 text: 'Fuel Rate',     
                             },    
-                            {        
-                                scales: "scaleX,scaleY2",
-                                values: data.myLOAD1,  
-                                decimals: 1,
-                                visible: false,
-                                text: 'Engine Load'     
-                            }, 
-                            {       
-                                scales: "scaleX,scaleY2",
-                                values: data.mySOG,   
-                                decimals: 1,
-                                text: 'SOG',     
-                            }, 
+
                             {       
                                 scales: "scaleX,scaleY5",
                                 values: data.myECON1,   
                                 decimals: 1,
-                                text: 'Litres per NM',     
+								visible: false,
+                                text: 'SOG',     
                             }, 
                             {       
-                                scales: "scaleX,scaleY3",
-                                values: data.myCOOLT1,  
-                                decimals: 1,
-                                visible: false, 
+                                scales: "scaleX,scaleY6",
+                                values: data.myCOOLT1,   
+                                decimals: 0,
                                 text: 'Coolant Temp',     
-                            }
+                            }, 
+                            
                         ]
                     }]
                 };

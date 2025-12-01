@@ -11,6 +11,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\BoatController;
 use App\Http\Controllers\UserBoatController;
 use App\Http\Controllers\TripsController;
+
+use App\Http\Controllers\BoatActivityController;
+
 use Google\Service\AIPlatformNotebooks\Event;
 use Google\Service\AlertCenter\UserChanges;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +28,9 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::get('/boat-activity', [BoatActivityController::class, 'show']);
+
 Route::get('/', [HomeController::class, 'searchPage'])->name('search');
 Route::post('/search', [HomeController::class, 'searchMac'])->name('search.mac');
 Route::get('forget-password', [ForgotPasswordController::class, 'showForgetPasswordForm'])->name('forget.password.get');
