@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Settings;
 use App\Models\BoatData;
 use App\Models\calendar;
+use App\Services\TripSpeedService;
+use App\Services\TripTrackService;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -154,125 +156,21 @@ class TripsController extends Controller
 
        return view('user.trips.index', compact('calendar', 'trips', 'date'));
     }
-    public function getTrackData(Request $request)
-    {
-        $date = $request->input('date');
-        $timestamp = strtotime(str_replace('/', '-', $date));
+public function getTrackData(Request $request, TripTrackService $tripTrackService)
+{
+    $dateInput = $request->input('date');
+    $mac = $request->input('mac');
 
-        $date = date('Y-m-d', $timestamp);
-
-        $mac = $request->input('mac');
-
-        $dataPoints = BoatData::where('date', $date)
-            ->where('mac', $mac)
-            ->where('val', 'A')
-			->where('utc', '!=' , '00:00:00')
-			->whereTime('utc', '<=', '24:00:00')
-            ->orderBy('datetime', 'asc')
-            ->get();
-
-        $data = [];
-
-        foreach ($dataPoints as $info) {
-            // Process your data
-            $cols = [
-                'time' => $info->utc,
-                'lat' => $info->latdec,
-                'lon' => $info->londec,
-                'sog' => ($info->sog == NULL) ? "-" : round($info->sog, 1),
-                'dog' => ($info->dog == 0) ? "-" : round($info->dog, 1),
-                'cog' => ($info->cog == NULL) ? "-" : $info->cog,
-                'dep' => ($info->dep == NULL) ? "-" : $info->dep,
-                'hdg' => ($info->hdg == NULL) ? "-" : $info->hdg,
-                'spd' => ($info->spd == NULL) ? "-" : $info->spd,
-                'dep' => ($info->dep == NULL) ? "-" : $info->dep,
-                'rpm1' => ($info->rpm1 == NULL) ? "-" : $info->rpm1,
-                'fuelr1' => ($info->fuelr1 == NULL) ? "-" : $info->fuelr1,
-                'rpm2' => ($info->rpm2 == NULL) ? "-" : $info->rpm2,
-                'fuelr2' => ($info->fuelr2 == NULL) ? "-" : $info->fuelr2,
-                'aws' => ($info->aws == NULL) ? "-" : $info->aws,
-                'awa' => ($info->awa == NULL) ? "-" : $info->awa,
-                'tws' => ($info->tws == NULL) ? "-" : $info->tws,
-                'twa' => ($info->twa == NULL) ? "-" : $info->twa,
-            ];
-
-            $data[] = $cols;
-        }
-
-        // Prepare max values
-        $maxes = [
-            'startTime' => BoatData::where('date', $date)
-                ->where('mac', $mac)
-                ->where('val', 'A')
-                ->where('utc', '!=' , '00:00:00')
-			->whereTime('utc', '<=', '24:00:00')
-                ->orderBy('datetime', 'asc')
-                ->first(),
-            'endTime' => BoatData::where('date', $date)
-                ->where('mac', $mac)
-                ->where('val', 'A')
-                ->where('utc', '!=' , '00:00:00')
-			->whereTime('utc', '<=', '24:00:00')
-                ->orderBy('datetime', 'desc')
-                ->first(),
-            'distance' => BoatData::where('date', $date)
-                ->where('mac', $mac)
-                ->where('val', 'A')
-                ->where('utc', '!=' , '00:00:00')
-                ->whereTime('utc', '<=', '24:00:00')
-                ->orderBy('dist', 'desc')
-                ->first()->dist,
-            'gpsdist' => BoatData::where('date', $date)
-                ->where('mac', $mac)
-                ->where('val', 'A')
-                ->where('utc', '!=' , '00:00:00')
-                ->whereTime('utc', '<=', '24:00:00')
-                ->orderBy('dog', 'desc')
-                ->first()->dog,
-            'speed' => BoatData::where('date', $date)
-                ->where('mac', $mac)
-                ->where('val', 'A')
-                ->where('utc', '!=' , '00:00:00')
-                ->whereTime('utc', '<=', '24:00:00')
-                ->orderBy('spd', 'desc')
-                ->first(),
-            'sog' => BoatData::where('date', $date)
-                ->where('mac', $mac)
-                ->where('val', 'A')
-                ->where('utc', '!=' , '00:00:00')
-                ->whereTime('utc', '<=', '24:00:00')
-                ->orderBy('sog', 'desc')
-                ->first(),
-            'minDepth' => BoatData::where('date', $date)
-                ->where('mac', $mac)
-                ->where('dep', '>', 0)
-                ->where('val', 'A')
-                ->where('utc', '!=' , '00:00:00')
-                ->whereTime('utc', '<=', '24:00:00')
-                ->orderBy('dep', 'asc')
-                ->first(),
-            'awind' => BoatData::where('date', $date)
-                ->where('mac', $mac)
-                ->where('val', 'A')
-                ->where('utc', '!=' , '00:00:00')
-                ->whereTime('utc', '<=', '24:00:00')
-                ->orderBy('aws', 'desc')
-                ->first(),
-            'twind' => BoatData::where('date', $date)
-                ->where('mac', $mac)
-                ->where('val', 'A')
-                ->where('utc', '!=' , '00:00:00')
-                ->whereTime('utc', '<=', '24:00:00')
-                ->orderBy('tws', 'desc')
-                ->first(),
-        ];
-
-        $output = new \stdClass();
-        $output->points = $data;
-        $output->maxes = $maxes;
-
-        return response()->json($output);
+    if (!$dateInput || !$mac) {
+        return response()->json(['error' => 'Missing required parameters'], 400);
     }
+
+    $date = date('Y-m-d', strtotime(str_replace('/', '-', $dateInput)));
+
+    return response()->json(
+        $tripTrackService->getTrackData($date, $mac)
+    );
+}
     public function getLogData(Request $request)
     {
         $start = $request->input('start');
@@ -397,128 +295,23 @@ class TripsController extends Controller
         
         return Response::json($jsonData, 200, [], JSON_UNESCAPED_UNICODE);
     }
-    public function fetchSpeed(Request $request)
-    {
-        $uid = $request->input('uid');
-        $start = $request->input('start');
-        $timestamp = strtotime(str_replace('/', '-', $start));
+public function fetchSpeed(Request $request, TripSpeedService $tripSpeedService)
+{
+    $uid = $request->input('uid');
+    $startInput = $request->input('start');
+    $endInput = $request->input('end');
 
-        $start = date('Y-m-d', $timestamp);
-
-        $end = $request->input('end');
-        $timestamp = strtotime(str_replace('/', '-', $end));
-
-        $end = date('Y-m-d', $timestamp);
-        
-
-        // Validate input
-        if (!$uid || !$start || !$end) {
-            return response()->json(['error' => 'Missing required parameters'], 400);
-        }
-
-        // Fetch data from the database
-        $mySOG = DB::table('boatdata')
-            ->select(DB::raw('AVG(sog) as sog'), 
-                    DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-            ->where('mac', $uid)
-            ->where('sog', '!=', NULL)
-			->where('utc', '!=' , '00:00:00')
-			->whereTime('utc', '<=', '24:00:00')
-	        ->whereBetween('date', [$start, $end])
-            ->groupBy('ep_utc')
-            ->limit(2000)
-            ->get()
-            ->map(function ($item) {
-                return [round($item->ep_utc), (float) $item->sog];
-            });
-
-        $mySPD = DB::table('boatdata')
-            ->select(DB::raw('AVG(spd) as spd'), 
-                    DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-            ->where('mac', $uid)
-            ->where('spd', '!=', NULL)
-			->where('utc', '!=' , '00:00:00')
-			->whereTime('utc', '<=', '24:00:00')
-            ->whereBetween('date', [$start, $end])
-            ->groupBy('ep_utc')
-            ->limit(2000)
-            ->get()
-            ->map(function ($item) {
-                return [round($item->ep_utc), (float) $item->spd];
-            });
-
-        $myAWS = DB::table('boatdata')
-            ->select(DB::raw('AVG(aws) as aws'), 
-                    DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-            ->where('mac', $uid)
-            ->where('aws', '!=', NULL)
-			->where('utc', '!=' , '00:00:00')
-			->whereTime('utc', '<=', '24:00:00')
-            ->whereBetween('date', [$start, $end])
-            ->groupBy('ep_utc')
-            ->limit(2000)
-            ->get()
-            ->map(function ($item) {
-                return [round($item->ep_utc), (float) $item->aws];
-            });
-
-        $myTWS = DB::table('boatdata')
-            ->select(DB::raw('AVG(tws) as tws'), 
-                    DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-            ->where('mac', $uid)
-            ->where('tws', '!=', NULL)
-			->where('utc', '!=' , '00:00:00')
-			->whereTime('utc', '<=', '24:00:00')
-            ->whereBetween('date', [$start, $end])
-            ->groupBy('ep_utc')
-            ->limit(2000)
-            ->get()
-            ->map(function ($item) {
-                return [round($item->ep_utc), (float) $item->tws];
-            });
-
-        $myGWS = DB::table('boatdata')
-            ->select(DB::raw('AVG(gws) as gws'), 
-                    DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-            ->where('mac', $uid)
-            ->where('gws', '!=', NULL)
-			->where('utc', '!=' , '00:00:00')
-			->whereTime('utc', '<=', '24:00:00')
-            ->whereBetween('date', [$start, $end])
-            ->groupBy('ep_utc')
-            ->limit(2000)
-            ->get()
-            ->map(function ($item) {
-                return [round($item->ep_utc), (float) $item->gws];
-            });
-
-        $myVMG = DB::table('boatdata')
-            ->select(DB::raw('AVG(vmg) as vmg'), 
-                    DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-            ->where('mac', $uid)
-            ->where('vmg', '!=', NULL)
-			->where('utc', '!=' , '00:00:00')
-			->whereTime('utc', '<=', '24:00:00')
-            ->whereBetween('date', [$start, $end])
-            ->groupBy('ep_utc')
-            ->limit(2000)
-            ->get()
-            ->map(function ($item) {
-                return [round($item->ep_utc), (float) $item->vmg];
-            });
-
-        // Prepare data for JSON response
-        $data = [
-            'mySOG' => $mySOG,
-            'mySPD' => $mySPD,
-            'myAWS' => $myAWS,
-            'myTWS' => $myTWS,
-            'myGWS' => $myGWS,
-            'myVMG' => $myVMG
-        ];
-
-        return response()->json($data);
+    if (!$uid || !$startInput || !$endInput) {
+        return response()->json(['error' => 'Missing required parameters'], 400);
     }
+
+    $start = date('Y-m-d', strtotime(str_replace('/', '-', $startInput)));
+    $end = date('Y-m-d', strtotime(str_replace('/', '-', $endInput)));
+
+    return response()->json(
+        $tripSpeedService->getSpeedSeries($uid, $start, $end)
+    );
+}
  public function fetchEngine(Request $request)
 {
     $uid = $request->input('uid');
