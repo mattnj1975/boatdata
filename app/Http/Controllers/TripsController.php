@@ -9,6 +9,7 @@ use App\Models\calendar;
 use App\Services\TripSpeedService;
 use App\Services\TripTrackService;
 use App\Services\TripTableService;
+use App\Services\TripLogService;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -172,78 +173,26 @@ public function getTrackData(Request $request, TripTrackService $tripTrackServic
         $tripTrackService->getTrackData($date, $mac)
     );
 }
-    public function getLogData(Request $request)
-    {
-        $start = $request->input('start');
-        $timestamp = strtotime(str_replace('/', '-', $start));
-        $start = date('Y-m-d', $timestamp);
-    
-        $end = $request->input('end');
-        $timestamp = strtotime(str_replace('/', '-', $end));
-        $end = date('Y-m-d', $timestamp);
-    
-        $mac = $request->input('mac');
-    
-        // Fetch data using Eloquent ORM
-        $boatdata = BoatData::select(DB::raw('id, mac, val, sog, latdec, londec, cog, dep, hdg, spd, rpm1, fuelr1, rpm2, fuelr2, awa, HOUR(utc) AS hour, MINUTE(utc) AS minute'))
-            ->whereBetween('date', [$start, $end])
-            ->where('mac', $mac)
-            ->where('val', 'A')
-            ->whereRaw('MINUTE(utc) % 15 = 0')
-            ->groupBy('hour', 'minute', 'id', 'mac', 'val', 'utc', 'sog', 'latdec', 'londec', 'cog', 'dep', 'hdg', 'spd', 'rpm1', 'fuelr1', 'rpm2', 'fuelr2', 'awa')
-            ->orderBy('utc', 'asc')
-            ->get();
-    
-        // Initialize variables to track previous hour and minute
-        $prevHour = null;
-        $prevMinute = null;
-    
-        // Initialize the HTML string
-        $html = '';
-    
-        foreach ($boatdata as $info) {
-            // Check if the current hour and minute are different from the previous ones
-            if ($info->hour != $prevHour || $info->minute != $prevMinute) {
-                // Set the current hour and minute as the previous ones for the next iteration
-                $prevHour = $info->hour;
-                $prevMinute = $info->minute;
-    
-                $html .= "<tr>";
-                if ($info->minute == '0') {
-                    $info->minute = '00';
-                }
-                $cols = [];
-                $cols[0] = $info->hour . ':' . $info->minute;
-                $cols[1] = number_format($info->latdec, 6, '.', ',') . $info->ns . ', ' . number_format($info->londec, 6, '.', ',') . $info->ew;
-                $cols[2] = ($info->sog == NULL) ? "-" : round($info->sog, 1) . "kts";
-                $cols[3] = ($info->cog == NULL) ? "-" : $info->cog . "&deg";
-                $cols[4] = ($info->dep == NULL) ? "-" : $info->dep . "m";
-                $cols[5] = ($info->hdg == NULL) ? "-" : $info->hdg . "&deg";
-                $cols[6] = ($info->spd == NULL) ? "-" : $info->spd . "kts";
-                $cols[7] = ($info->aws == NULL) ? "-" : $info->aws . "kts @" . $info->awa . "&deg";
-                $cols[8] = ($info->rpm1 == NULL) ? "-" : $info->rpm1;
-                $cols[9] = ($info->fuelr1 == NULL) ? "-" : $info->fuelr1 . "l/hr";
-                $cols[10] = ($info->rpm2 == NULL) ? "-" : $info->rpm2;
-                $cols[11] = ($info->fuelr2 == NULL) ? "-" : $info->fuelr2 . "l/hr";
-    
-                foreach ($cols as $col) {
-                    $html .= "<td>" . $col . "</td>";
-                }
-                if ($request->front == 1) {
-                    
-                } else {
-                    if (Auth::user() && Auth::user()->role_as != 3) {
-                     //   $html .= "<td><div style='margin-right:10px'><a href='javascript:void(0)' data-toggle='tooltip' data-id='" . $info->id . "' data-original-title='Delete' class='mr-3 btn btn-outline-danger btn-sm deleteData'>Delete</a></div></td>";
-                        $html .= "<td><div style='margin-right:10px'></div></td>";
-                    }
-                }
-    
-                $html .= "</tr>";
-            }
-        }
-    
-        return $html;
+public function getLogData(Request $request, TripLogService $tripLogService)
+{
+    $startInput = $request->input('start');
+    $endInput = $request->input('end');
+    $mac = $request->input('mac');
+
+    if (!$startInput || !$endInput || !$mac) {
+        return response('Missing required parameters', 400);
     }
+
+    $start = date('Y-m-d', strtotime(str_replace('/', '-', $startInput)));
+    $end = date('Y-m-d', strtotime(str_replace('/', '-', $endInput)));
+
+    return $tripLogService->getLogHtml(
+        $start,
+        $end,
+        $mac,
+        (bool) $request->input('front')
+    );
+}
 
 public function getTableData(Request $request, TripTableService $tripTableService)
 {
