@@ -9,6 +9,7 @@ use App\Models\AdminBoats;
 use App\Models\UserBoats;
 use App\Models\BoatNotes;
 use App\Models\BoatFile;
+use App\Services\BoatDocumentService;
 use Yajra\DataTables\DataTables;
 use Auth;
 
@@ -235,56 +236,38 @@ class BoatController extends Controller
         Settings::find($id)->delete();
         return response()->json(['success' => 'Boat deleted successfully.']);
     }
-    public function addBoatNote(Request $request)
-    {
-        $BoatNote = new BoatNotes();
-        $BoatNote->boat_id = $request->boat_id;
-        $BoatNote->user_id = Auth::id();
-        $BoatNote->note = $request->note;
-        $BoatNote->save();
-        return response()->json(['success' => 'Note added successfully.']);
+public function addBoatNote(Request $request, BoatDocumentService $boatDocumentService)
+{
+    $boatDocumentService->addNote($request->boat_id, $request->note);
+
+    return response()->json(['success' => 'Note added successfully.']);
+}
+public function editBoatNote(Request $request, BoatDocumentService $boatDocumentService)
+{
+    $note = $boatDocumentService->updateNote($request->note_id, $request->note);
+
+    if (!$note) {
+        return response()->json(['error' => 'Note not found.'], 404);
     }
-    public function editBoatNote(Request $request)
-    {
-        $BoatNote = BoatNotes::find($request->note_id);
-        $BoatNote->user_id = Auth::id();
-        $BoatNote->note = $request->note;
-        $BoatNote->save();
-        return response()->json(['success' => 'Note updated successfully.']);
+
+    return response()->json(['success' => 'Note updated successfully.']);
+}
+public function addBoatFile(Request $request, BoatDocumentService $boatDocumentService)
+{
+    $boatDocumentService->addFile($request);
+
+    return response()->json(['success' => 'File added successfully.']);
+}
+public function editBoatFile(Request $request, BoatDocumentService $boatDocumentService)
+{
+    $file = $boatDocumentService->updateFile($request);
+
+    if (!$file) {
+        return response()->json(['error' => 'File not found.'], 404);
     }
-    public function addBoatFile(Request $request)
-    {
-        $BoatNote = new BoatFile();
-        $BoatNote->boat_id = $request->boat_id;
-        $BoatNote->user_id = Auth::id();
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $ext = $file->getClientOriginalExtension();
-            $filename = time() . '.' . $ext;
-            $originalFilename = $file->getClientOriginalName();
-            $file->move('boat_files', $filename);
-            $BoatNote->file = 'boat_files/' . $filename;
-            $BoatNote->file_name = $originalFilename;
-        }
-        $BoatNote->save();
-        return response()->json(['success' => 'File added successfully.']);
-    }
-    public function editBoatFile(Request $request)
-    {
-        $BoatNote = BoatFile::find($request->file_id);
-        $BoatNote->user_id = Auth::id();
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $ext = $file->getClientOriginalExtension();
-            $filename = time() . '.' . $ext;
-            $originalFilename = $file->getClientOriginalName();
-            $file->move('boat_files', $filename);
-            $BoatNote->file = 'boat_files/' . $filename;
-            $BoatNote->file_name = $originalFilename;
-        }
-        $BoatNote->save();
-        return response()->json(['success' => 'File updated successfully.']);
-    }
+
+    return response()->json(['success' => 'File updated successfully.']);
+}
     public function viewBoat($id)
     {
         $notes = BoatNotes::where('boat_id', $id)->latest()->get();
@@ -307,23 +290,13 @@ class BoatController extends Controller
         BoatNotes::find($id)->delete();
         return response()->json(['success' => 'Note deleted successfully.']);
     }
-    public function deleteFile($id)
-    {
-        $file = BoatFile::find($id);
 
-        if ($file) {
-            $filePath = $file->file;
-
-            if (file_exists($filePath)) {
-                unlink($filePath);
-            }
-
-            $file->delete();
-
-            return response()->json(['success' => 'File deleted successfully.']);
-        } else {
-            // Return error response if file record not found
-            return response()->json(['error' => 'File not found.'], 404);
-        }
+public function deleteFile($id, BoatDocumentService $boatDocumentService)
+{
+    if (!$boatDocumentService->deleteFile($id)) {
+        return response()->json(['error' => 'File not found.'], 404);
     }
+
+    return response()->json(['success' => 'File deleted successfully.']);
+}
 }
