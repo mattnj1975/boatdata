@@ -4,19 +4,99 @@
 <link rel="stylesheet" type="text/css" href="login_assets/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css" />
 <style>
-    .chart--container {
-        height: 100%;
-        width: 100%;
-        min-height: 400px;
-        }
-        
-        .zc-ref {
-        display: none;
-        }
+    body {
+        background: linear-gradient(180deg, #071827 0%, #102f46 45%, #f4f7fa 45%);
+        color: #102033;
+    }
+
+    .marine-hero {
+        padding: 28px 0 24px;
+        color: #fff;
+    }
+
+    .marine-title {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: .3px;
+        margin-bottom: 4px;
+    }
+
+    .marine-subtitle {
+        color: #b8d4e8;
+        margin-bottom: 0;
+    }
+
+    .marine-card {
+        border: 0;
+        border-radius: 18px;
+        box-shadow: 0 18px 45px rgba(0,0,0,.18);
+        overflow: hidden;
+    }
+
+    .marine-card-header {
+        background: #0b2538;
+        color: #fff;
+        padding: 14px 20px;
+        font-weight: 700;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .marine-card-body {
+        padding: 22px;
+    }
+
+    .marine-login-btn {
+        border-color: rgba(255,255,255,.55);
+        color: #fff;
+        border-radius: 999px;
+        padding: 8px 18px;
+    }
+
+    .marine-login-btn:hover {
+        background: #fff;
+        color: #0b2538;
+    }
+
+.trip-results-table {
+    width: 100% !important;
+    min-width: 900px;
+    table-layout: auto;
+    margin-bottom: 0;
+}
+
+.trip-results-table th,
+.trip-results-table td {
+    vertical-align: middle;
+    padding: 18px 16px;
+}
+
+.trip-results-table thead th {
+    background: #f3f7fb;
+    border-bottom: 2px solid #d7e2eb !important;
+    white-space: nowrap;
+}
+
+.trip-results-table tbody tr:hover {
+    background: #f8fbfe;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pagination {
+    margin-top: 0;
+    margin-bottom: 0;
+}		
+		
+    
 </style>
 @endsection
 @section('content')
-<div class="container">
+<div class="container-fluid px-4">
     <div class="row">
         <div class="col">
             <div class="d-flex justify-content-center mb-2">
@@ -27,25 +107,22 @@
     </div>
 
 
-<div class="row justify-content-center">
-    <div class="col-10">
-        <div class="card">
-            <div class="card-header text-white" style="background-color: black; display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem;">
+<div class="row">
+    <div class="col-12">
+        <div class="card marine-card">
+            <div class="marine-card-header">
+                <b>Boat Trips</b>
 
-    <b>Boat Trips</b>
+                <a href="../view"
+                   style="color: white; font-weight: bold; font-size: 1.5rem; text-decoration: none; cursor: pointer;"
+                   title="Back">
+                    &times;
+                </a>
+            </div>
 
-    <a href="../view" 
-       style="color: white; font-weight: bold; font-size: 1.5rem; text-decoration: none; cursor: pointer;" 
-       title="Back">
-        &times;
-    </a>
-
-</div>
-
-
-            <div class="card-body">
-                <div class="pt-4" id="searchResults">
-                    <table class="table border-secondary table-hover w-100 table-responsive table-bordered">
+            <div class="marine-card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered trip-results-table">
                         <thead>
                             <tr>
                                 <th></th>
@@ -57,27 +134,23 @@
                                 <th>Distance</th>
                             </tr>
                         </thead>
-                        <tbody id="tableBody">
-
-                        </tbody>
-
+                        <tbody id="tableBody"></tbody>
                     </table>
-                    <div class="row justify-content-between">
-                        <div class="col-auto">
-                            <div id="paginationContainer"></div>
-                        </div>
-                        <div class="col-auto">
-                            <div id="entryCount"></div>
-                        </div>
-                    </div> 
+                </div>
+
+                <div class="row justify-content-between align-items-center mt-3">
+                    <div class="col-auto">
+                        <div id="paginationContainer"></div>
+                    </div>
+                    <div class="col-auto">
+                        <div id="entryCount"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 </div>
-
 <div class="container-fluid boat_details" id="boat_details">
     <div class="row mt-5">
         <div class="col-12">

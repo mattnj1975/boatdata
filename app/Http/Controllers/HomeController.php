@@ -8,6 +8,7 @@ use App\Models\BoatData;
 use App\Models\AdminBoats;
 use App\Models\UserBoats;
 use App\Models\User;
+use App\Services\FleetStatusService;
 use Illuminate\Http\Request;
 class HomeController extends Controller
 {
@@ -108,7 +109,9 @@ class HomeController extends Controller
             ->get();
             return view('filter_home', compact('Settings'));
         } else {
-            return view('home');
+            $fleetStatus = app(\App\Services\FleetStatusService::class)->getPublicFleetStats();
+
+return view('home', compact('fleetStatus'));
         }
          
     }

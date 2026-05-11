@@ -11,6 +11,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\BoatController;
 use App\Http\Controllers\UserBoatController;
 use App\Http\Controllers\TripsController;
+use App\Http\Controllers\BoatMapController;
+use App\Http\Controllers\FleetMapController;
 
 use App\Http\Controllers\BoatActivityController;
 
@@ -44,6 +46,13 @@ Route::post('/assets/ajax/get-speed-data', [TripsController::class, 'fetchSpeed'
 Route::post('/assets/ajax/get-engine-data', [TripsController::class, 'fetchEngine'])->name('admin.fetchEngine');
 Auth::routes();
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+Route::get('/fleet-map/boats', [FleetMapController::class, 'boats'])->name('fleet.map.boats');
+Route::get('/fleet-map/data/{mac}/{days?}', [FleetMapController::class, 'boatData'])->name('fleet.map.boatData');
+Route::get('/fleet-map', [FleetMapController::class, 'index']) ->name('fleet.map');
+
+Route::get('/boat-map/{mac}/{days?}', [BoatMapController::class, 'show'])
+    ->name('boat.map');
 
 Route::group(['middleware' => ['auth']], function () {
    

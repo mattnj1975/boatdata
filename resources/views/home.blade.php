@@ -99,7 +99,59 @@
 
     .zc-ref {
         display: none;
-    }
+	} 
+	.table-responsive {
+    overflow-x: auto;
+}
+
+table {
+    width: 100% !important;
+    background: #fff;
+}
+
+table thead th {
+    background: #f3f7fb;
+    border-bottom: 2px solid #d7e2eb !important;
+    white-space: nowrap;
+}
+
+table tbody tr:hover {
+    background: #f8fbfe;
+}
+
+.pagination {
+    margin-top: 18px;
+}
+
+.status-card {
+    background: #f6f9fc;
+    border: 1px solid #dbe7ef;
+    border-radius: 16px;
+    padding: 18px;
+    height: 100%;
+}
+
+.status-label {
+    font-size: .85rem;
+    color: #64798a;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.status-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0b2538;
+    margin-top: 6px;
+}
+
+.status-value small {
+    font-size: 1rem;
+    color: #64798a;
+}
+		
+    
 </style>
 @endsection
 @section('content')
@@ -115,7 +167,7 @@
         </div>
 
         <div class="row justify-content-center">
-            <div class="col-lg-10 col-xl-9">
+            <div class="col-12">
                 <div class="card marine-card">
                     <div class="marine-card-header">
                         <span>Search Boat</span>
@@ -129,7 +181,7 @@
                                     <input required type="text" name="mac" class="form-control marine-search-input" placeholder="Search by MAC address or email address...">
                                 </div>
                                 <div class="col-lg-2">
-                                    <button id="searchButton" type="submit" class="btn marine-search-btn w-100">Search</button>
+                                   <button id="searchButton" type="submit" class="btn marine-search-btn w-100">Search</button>
                                 </div>
                                 <div class="col-lg-1 text-lg-end">
                                     <a href="../view" class="btn btn-outline-danger marine-clear-btn">&times;</a>
@@ -153,8 +205,11 @@
         </div>
     </div>
 </div>
-
-<iframe id="gauge_chart" scrolling="no" src="https://boatdata.co.uk/app/gauge5.php" title="description"></iframe>
+@if(isset($fleetStatus))
+    <div id="fleetStatusWrapper">
+        @include('partials.fleet-status', ['fleetStatus' => $fleetStatus])
+    </div>
+@endif
 <div class="container-fluid boat_details" id="boat_details">
     <div class="row mt-5">
         <div class="col-12">
@@ -349,6 +404,10 @@
             currentPage = 1;
             data = [];
             document.getElementById('searchResults').innerHTML = '';
+			const fleetStatusWrapper = document.getElementById('fleetStatusWrapper');
+if (fleetStatusWrapper) {
+    fleetStatusWrapper.style.display = 'none';
+}
 
             var formData = new FormData(this);
 
@@ -381,16 +440,14 @@
             var endIndex = startIndex + rowsPerPage;
             var displayedData = data.slice(startIndex, endIndex);
 
-            var tableHTML = '<table class="table border-secondary table-hover table-responsive table-bordered"><thead><tr><th></th><th>Boat Name</th><th>Trip Date</th><th>Start</th><th>Finish</th><th>Duration</th><th>Distance</th></tr></thead><tbody>';
+            var tableHTML = '<div class="table-responsive"><table class="table table-hover table-bordered trip-results-table"><thead><tr><th></th><th>Boat Name</th><th>Trip Date</th><th>Start</th><th>Finish</th><th>Duration</th><th>Distance</th></tr></thead><tbody>';
 
             displayedData.forEach(function(item) {
                 var tripDate = new Date(item.TripDate);
                 var formattedTripDate = ('0' + tripDate.getDate()).slice(-2) + '/' + ('0' + (tripDate.getMonth() + 1)).slice(-2) + '/' + tripDate.getFullYear();
                 tableHTML += '<tr>';
                 tableHTML += '<td><div class="d-flex btn-group-lg" role="group" ><i style="cursor: pointer;" class="fa fa-solid fa-map viewLink viewTrack" title="Click here then scroll down"></i><br><i style="cursor: pointer;" class="fa fa-solid fa-table viewLink viewData" title="Click here then scroll down"></i></div></td>';
-				tableHTML += '<td>' + item.boatname + ' </br>(<a href="/app/map/index.php?uid=' + item.mac + '" title="Click to show all trips"><small data-mac="' + item.mac + '">' + item.mac + '</small></a>)</td>';
-				tableHTML += '<td data-date="' + formattedTripDate + '">' + formattedTripDate + '</td>';
-                tableHTML += '<td>' + (item.Begin ? item.Begin : 'N/A') + '</td>';
+				tableHTML += '<td>' + item.boatname + ' </br>(<a href="{{ url('/boat-map') }}/' + encodeURIComponent(item.mac) + '" title="Click to show all trips"><small data-mac="' + item.mac + '">' + item.mac + '</small></a>)</td>';
                 tableHTML += '<td>' + (item.Finish ? item.Finish : 'N/A') + '</td>';
 
                 if (item.Begin && item.Finish) {
@@ -410,7 +467,7 @@
                 tableHTML += '</tr>';
             });
 
-            tableHTML += '</tbody></table>';
+            tableHTML += '</tbody></table></div>';
             document.getElementById('searchResults').innerHTML = tableHTML;
 
             // Show count of entries
