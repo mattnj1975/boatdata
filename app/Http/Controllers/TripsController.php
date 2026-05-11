@@ -8,6 +8,7 @@ use App\Models\BoatData;
 use App\Models\calendar;
 use App\Services\TripSpeedService;
 use App\Services\TripTrackService;
+use App\Services\TripTableService;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -244,57 +245,24 @@ public function getTrackData(Request $request, TripTrackService $tripTrackServic
         return $html;
     }
 
-    public function getTableData(Request $request)
-    {
-        $date = $request->input('date');
-        $timestamp = strtotime(str_replace('/', '-', $date));
-        $date = date('Y-m-d', $timestamp);
-        $mac = $request->input('mac');
-    
-        // Fetch data using Eloquent ORM
-        $dataPoints = BoatData::where('date', $date)
-                              ->where('mac', $mac)
-							  ->orderBy('datetime', 'asc')
-                              ->get();
-    
-        $jsonData = [];
-        foreach ($dataPoints as $info) {
-            $rowData = [
-                'utc' => $info->utc,
-                //'location' => number_format($info->lat, 4, '.', ',') . $info->ns . ', ' . number_format($info->lon, 4, '.', ',') . $info->ew,
-                'location' => $info->latdec .  ' ' . $info->londec,
-                'sog' => ($info->sog == NULL) ? "-" : round($info->sog, 1) . "kts",
-                'cog' => ($info->cog == NULL) ? "-" : $info->cog . "&deg",
-                'depth' => ($info->dep == NULL) ? "-" : $info->dep . "m",
-                'heading' => ($info->hdg == NULL) ? "-" : $info->hdg . "&deg",
-                'pitch' => ($info->pitch == NULL) ? "-" : $info->pitch . "&deg",
-                'roll' => ($info->roll == NULL) ? "-" : $info->roll . "&deg",
-                'speed' => ($info->spd == NULL) ? "-" : $info->spd . "kts",
-                'tank1' => ($info->tank1 == NULL) ? "-" : $info->tank1 . "%",
-                'tank2' => ($info->tank2 == NULL) ? "-" : $info->tank2 . "%",
-                'tank3' => ($info->tank3 == NULL) ? "-" : $info->tank3 . "%",
-                'tank4' => ($info->tank4 == NULL) ? "-" : $info->tank4 . "%",
+public function getTableData(Request $request, TripTableService $tripTableService)
+{
+    $dateInput = $request->input('date');
+    $mac = $request->input('mac');
 
-                'rpm1' => ($info->rpm1 == NULL) ? "-" : $info->rpm1,
-                'fuelr1' => ($info->fuelr1 == NULL) ? "-" : $info->fuelr1 . "l/hr",
-                'rpm2' => ($info->rpm2 == NULL) ? "-" : $info->rpm2,
-                'fuelr2' => ($info->fuelr2 == NULL) ? "-" : $info->fuelr2 . "l/hr",
-                'awa' => ($info->aws == NULL || $info->awa == NULL) ? "-" : $info->aws . "kts @" . $info->awa . "&deg",
-                'delete_button' => '<a href="javascript:void(0)" class="mr-3 btn btn-outline-danger btn-sm deleteData" data-id="' . $info->id . '">Delete</a>',
-            ];
-    
-            // Encode each value in UTF-8 to ensure proper encoding
-            foreach ($rowData as &$value) {
-                if (!mb_check_encoding($value, 'UTF-8')) {
-                    $value = mb_convert_encoding($value, 'UTF-8');
-                }
-            }
-    
-            $jsonData[] = $rowData;
-        }
-        
-        return Response::json($jsonData, 200, [], JSON_UNESCAPED_UNICODE);
+    if (!$dateInput || !$mac) {
+        return response()->json(['error' => 'Missing required parameters'], 400);
     }
+
+    $date = date('Y-m-d', strtotime(str_replace('/', '-', $dateInput)));
+
+    return Response::json(
+        $tripTableService->getTableRows($date, $mac),
+        200,
+        [],
+        JSON_UNESCAPED_UNICODE
+    );
+}
 public function fetchSpeed(Request $request, TripSpeedService $tripSpeedService)
 {
     $uid = $request->input('uid');
