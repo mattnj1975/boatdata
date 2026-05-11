@@ -4,79 +4,154 @@
 <link rel="stylesheet" type="text/css" href="login_assets/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css" />
 <style>
- body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-        }
-        iframe {
-            width: 100%;
-            height: 800px;
-            border: none;
-        }
+    body {
+        background: linear-gradient(180deg, #071827 0%, #102f46 45%, #f4f7fa 45%);
+        color: #102033;
+    }
+
+    .marine-hero {
+        padding: 28px 0 24px;
+        color: #fff;
+    }
+
+    .marine-title {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: .3px;
+        margin-bottom: 4px;
+    }
+
+    .marine-subtitle {
+        color: #b8d4e8;
+        margin-bottom: 0;
+    }
+
+    .marine-card {
+        border: 0;
+        border-radius: 18px;
+        box-shadow: 0 18px 45px rgba(0,0,0,.18);
+        overflow: hidden;
+    }
+
+    .marine-card-header {
+        background: #0b2538;
+        color: #fff;
+        padding: 14px 20px;
+        font-weight: 700;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .marine-card-body {
+        padding: 22px;
+    }
+
+    .marine-login-btn {
+        border-color: rgba(255,255,255,.55);
+        color: #fff;
+        border-radius: 999px;
+        padding: 8px 18px;
+    }
+
+    .marine-login-btn:hover {
+        background: #fff;
+        color: #0b2538;
+    }
+
+    .marine-search-input {
+        border-radius: 999px;
+        padding: 11px 18px;
+        border: 1px solid #c9d7e2;
+    }
+
+    .marine-search-btn {
+        border-radius: 999px;
+        padding: 10px 22px;
+        background: #12a7c9;
+        border-color: #12a7c9;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .marine-clear-btn {
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 22px;
+        line-height: 1;
+    }
+
+    iframe {
+        width: 100%;
+        height: 800px;
+        border: none;
+    }
+
     .chart--container {
         height: 100%;
         width: 100%;
         min-height: 400px;
-        }
-        
-        .zc-ref {
+    }
+
+    .zc-ref {
         display: none;
-        }
+    }
 </style>
 @endsection
 @section('content')
-<div class="container">
-    <div class="row">
-        <div class="col">
-            <div class="d-flex justify-content-center mb-2">
-            <a class="btn btn-outline-secondary" href="{{route('dashboard')}}" style="width: 250px;">Login to Admin Panel</a>
+<div class="marine-hero">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <div class="marine-title">Boat Data Viewer</div>
+                <p class="marine-subtitle">Search vessel telemetry, trips, tracks and engine data.</p>
             </div>
+
+            <a class="btn marine-login-btn" href="{{ route('dashboard') }}">Admin Login</a>
         </div>
 
-    </div>
-
-
-<div class="row justify-content-center">
-    <div class="col-10">
-        <div class="card">
-            <div class="card-header text-center text-white" style="background-color: black;">
-                <b>Search Boat</b>
-            </div>
-
-            <div class="card-body">
-                <form id="searchForm" action="{{ route('search.mac') }}" method="post">
-                    @csrf
-                    <div class="row align-items-center">
-                        <div class="col-lg-10 col-md-10 col-sm-6">
-                            <input style="outline: none; box-shadow: none;" required type="text" name="mac" class="form-control" placeholder="Search by mac or by email address ... ">
-                        </div>
-                        <div class="col-lg-1 col-md-1 col-sm-3">
-                            <button id="searchButton" type="submit" class="btn btn-outline-success">Search</button>
-                        </div>
-                        <div class="col-lg-1 col-md-1 col-sm-3">
-                            <a href="../view" class="btn btn-outline-danger" style="padding: 6px 10px; font-weight: bold; font-size: 18px; line-height: 1; display: inline-flex; justify-content: center; align-items: center;">&times;</a>
-                        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="card marine-card">
+                    <div class="marine-card-header">
+                        <span>Search Boat</span>
                     </div>
-                </form>
-                <div class="pt-4" id="searchResults"></div>
-                <div class="row justify-content-between">
-                    <div class="col-auto">
-                        <div id="paginationContainer"></div>
-                    </div>
-                    <div class="col-auto">
-                        <div id="entryCount"></div>
+
+                    <div class="marine-card-body">
+                        <form id="searchForm" action="{{ route('search.mac') }}" method="post">
+                            @csrf
+                            <div class="row g-2 align-items-center">
+                                <div class="col-lg-9">
+                                    <input required type="text" name="mac" class="form-control marine-search-input" placeholder="Search by MAC address or email address...">
+                                </div>
+                                <div class="col-lg-2">
+                                    <button id="searchButton" type="submit" class="btn marine-search-btn w-100">Search</button>
+                                </div>
+                                <div class="col-lg-1 text-lg-end">
+                                    <a href="../view" class="btn btn-outline-danger marine-clear-btn">&times;</a>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="pt-4" id="searchResults"></div>
+
+                        <div class="row justify-content-between">
+                            <div class="col-auto">
+                                <div id="paginationContainer"></div>
+                            </div>
+                            <div class="col-auto">
+                                <div id="entryCount"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
-</div>
-
-    
-         
 </div>
 
 <iframe id="gauge_chart" scrolling="no" src="https://boatdata.co.uk/app/gauge5.php" title="description"></iframe>
