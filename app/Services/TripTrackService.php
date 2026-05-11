@@ -53,12 +53,10 @@ class TripTrackService
         return $output;
     }
 
-    private function baseQuery(string $date, string $mac)
-    {
-        return BoatData::where('date', $date)
-            ->where('mac', $mac)
-            ->where('val', 'A')
-            ->where('utc', '!=', '00:00:00')
-            ->whereTime('utc', '<=', '24:00:00');
-    }
+private function baseQuery(string $date, string $mac)
+{
+    return BoatData::forBoat($mac)
+        ->onTripDate($date)
+        ->validTripPoint();
+}
 }

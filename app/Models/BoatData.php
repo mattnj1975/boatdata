@@ -102,4 +102,24 @@ class BoatData extends Model
         'londec',
         'datetime',
     ];
+
+
+public function scopeForBoat($query, string $mac)
+{
+    return $query->where('mac', $mac);
+}
+
+public function scopeOnTripDate($query, string $date)
+{
+    return $query->where('date', $date);
+}
+
+public function scopeValidTripPoint($query)
+{
+    return $query
+        ->where('val', 'A')
+        ->where('utc', '!=', '00:00:00')
+        ->whereTime('utc', '<=', '24:00:00');
+}
+
 }
