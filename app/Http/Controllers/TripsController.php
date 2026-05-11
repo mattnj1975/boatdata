@@ -10,6 +10,7 @@ use App\Services\TripSpeedService;
 use App\Services\TripTrackService;
 use App\Services\TripTableService;
 use App\Services\TripLogService;
+use App\Services\TripEngineService;
 use Carbon\Carbon;
 use Auth;
 use DB;
@@ -229,203 +230,22 @@ public function fetchSpeed(Request $request, TripSpeedService $tripSpeedService)
         $tripSpeedService->getSpeedSeries($uid, $start, $end)
     );
 }
- public function fetchEngine(Request $request)
+public function fetchEngine(Request $request, TripEngineService $tripEngineService)
 {
     $uid = $request->input('uid');
-    $start = $request->input('start');
-    $timestamp = strtotime(str_replace('/', '-', $start));
-    $start = date('Y-m-d', $timestamp);
+    $startInput = $request->input('start');
+    $endInput = $request->input('end');
 
-    $end = $request->input('end');
-    $timestamp = strtotime(str_replace('/', '-', $end));
-    $end = date('Y-m-d', $timestamp);
-
-    if (!$uid || !$start || !$end) {
+    if (!$uid || !$startInput || !$endInput) {
         return response()->json(['error' => 'Missing required parameters'], 400);
     }
 
-    $myRPM1 = DB::table('boatdata')
-        ->select(DB::raw('AVG(rpm1) as rpm1'), DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-        ->where('mac', $uid)
-        ->where('utc', '!=', '00:00:00')
-        ->whereTime('utc', '<=', '24:00:00')
-        ->whereNotNull('rpm1')
-        ->whereBetween('date', [$start, $end])
-        ->groupBy('ep_utc')
-        ->limit(2000)
-        ->get()
-        ->map(fn($item) => [(int) round($item->ep_utc), (float) round($item->rpm1, 2)]);
+    $start = date('Y-m-d', strtotime(str_replace('/', '-', $startInput)));
+    $end = date('Y-m-d', strtotime(str_replace('/', '-', $endInput)));
 
-    $myRPM2 = DB::table('boatdata')
-        ->select(DB::raw('AVG(rpm2) as rpm2'), DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-        ->where('mac', $uid)
-        ->where('utc', '!=', '00:00:00')
-        ->whereTime('utc', '<=', '24:00:00')
-        ->whereNotNull('rpm2')
-        ->whereBetween('date', [$start, $end])
-        ->groupBy('ep_utc')
-        ->limit(2000)
-        ->get()
-        ->map(fn($item) => [(int) round($item->ep_utc), (float) round($item->rpm2, 2)]);
-
-    $myBOOST1 = DB::table('boatdata')
-        ->select(DB::raw('AVG(boost1) as boost1'), DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-        ->where('mac', $uid)
-        ->where('utc', '!=', '00:00:00')
-        ->whereTime('utc', '<=', '24:00:00')
-        ->whereNotNull('boost1')
-        ->groupBy('ep_utc')
-        ->whereBetween('date', [$start, $end])
-        ->limit(2000)
-        ->get()
-        ->map(fn($item) => [(int) round($item->ep_utc), (float) round($item->boost1, 2)]);
-
-    $myBOOST2 = DB::table('boatdata')
-        ->select(DB::raw('AVG(boost2) as boost2'), DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-        ->where('mac', $uid)
-        ->where('utc', '!=', '00:00:00')
-        ->whereTime('utc', '<=', '24:00:00')
-        ->whereNotNull('boost2')
-        ->groupBy('ep_utc')
-        ->whereBetween('date', [$start, $end])
-        ->limit(2000)
-        ->get()
-        ->map(fn($item) => [(int) round($item->ep_utc), (float) round($item->boost2, 2)]);
-
-    $myFUELR1 = DB::table('boatdata')
-        ->select(DB::raw('AVG(fuelr1) as fuelr1'), DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-        ->where('mac', $uid)
-        ->where('utc', '!=', '00:00:00')
-        ->whereTime('utc', '<=', '24:00:00')
-        ->whereNotNull('fuelr1')
-        ->whereBetween('date', [$start, $end])
-        ->groupBy('ep_utc')
-        ->limit(2000)
-        ->get()
-        ->map(fn($item) => [(int) round($item->ep_utc), (float) round($item->fuelr1, 2)]);
-
-    $myFUELR2 = DB::table('boatdata')
-        ->select(DB::raw('AVG(fuelr2) as fuelr2'), DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-        ->where('mac', $uid)
-        ->where('utc', '!=', '00:00:00')
-        ->whereTime('utc', '<=', '24:00:00')
-        ->whereNotNull('fuelr2')
-        ->whereBetween('date', [$start, $end])
-        ->groupBy('ep_utc')
-        ->limit(2000)
-        ->get()
-        ->map(fn($item) => [(int) round($item->ep_utc), (float) round($item->fuelr2, 2)]);
-
-    $myLOAD1 = DB::table('boatdata')
-        ->select(DB::raw('AVG(load1) as load1'), DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-        ->where('mac', $uid)
-        ->where('utc', '!=', '00:00:00')
-        ->whereTime('utc', '<=', '24:00:00')
-        ->whereNotNull('load1')
-        ->whereBetween('date', [$start, $end])
-        ->groupBy('ep_utc')
-        ->limit(2000)
-        ->get()
-        ->map(fn($item) => [(int) round($item->ep_utc), (float) round($item->load1, 2)]);
-
-    $myLOAD2 = DB::table('boatdata')
-        ->select(DB::raw('AVG(load2) as load2'), DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-        ->where('mac', $uid)
-        ->where('utc', '!=', '00:00:00')
-        ->whereTime('utc', '<=', '24:00:00')
-        ->whereNotNull('load2')
-        ->whereBetween('date', [$start, $end])
-        ->groupBy('ep_utc')
-        ->limit(2000)
-        ->get()
-        ->map(fn($item) => [(int) round($item->ep_utc), (float) round($item->load2, 2)]);
-
-$mySOG = DB::table('boatdata')
-    ->select(
-        DB::raw('AVG(sog) as sog'),
-        DB::raw('FLOOR(UNIX_TIMESTAMP(CONCAT(date, " ", utc)) / 5) * 5000 as ep_utc') // 5s buckets
-    )
-    ->where('mac', $uid)
-    ->whereNotNull('sog')
-    ->where('utc', '!=', '00:00:00')
-    ->whereTime('utc', '<=', '24:00:00')
-    ->whereBetween('date', [$start, $end])
-    ->groupBy('ep_utc')
-    ->limit(2000)
-    ->get()
-    ->map(fn($item) => [(int) $item->ep_utc, round((float) $item->sog, 2)]);
-
-
-    $myCOOLT1 = DB::table('boatdata')
-        ->select(DB::raw('AVG(coolt1) as coolt1'), DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-        ->where('mac', $uid)
-        ->where('utc', '!=', '00:00:00')
-        ->whereTime('utc', '<=', '24:00:00')
-        ->whereNotNull('coolt1')
-        ->whereBetween('date', [$start, $end])
-        ->groupBy('ep_utc')
-        ->limit(2000)
-        ->get()
-        ->map(fn($item) => [(int) round($item->ep_utc), (float) round($item->coolt1, 2)]);
-
-    $myCOOLT2 = DB::table('boatdata')
-        ->select(DB::raw('AVG(coolt2) as coolt2'), DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-        ->where('mac', $uid)
-        ->where('utc', '!=', '00:00:00')
-        ->whereTime('utc', '<=', '24:00:00')
-        ->whereNotNull('coolt2')
-        ->whereBetween('date', [$start, $end])
-        ->groupBy('ep_utc')
-        ->limit(2000)
-        ->get()
-        ->map(fn($item) => [(int) round($item->ep_utc), (float) round($item->coolt2, 2)]);
-
-    $myECON1 = DB::table('boatdata')
-        ->select(DB::raw('AVG(eng1_econ) as eng1_econ'), DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-        ->where('mac', $uid)
-        ->where('utc', '!=', '00:00:00')
-        ->whereTime('utc', '<=', '24:00:00')
-        ->where('sog', '>', 2)
-        ->where('eng1_econ', '>', 0)
-        ->whereBetween('date', [$start, $end])
-        ->groupBy('ep_utc')
-        ->limit(2000)
-        ->get()
-        ->map(fn($item) => [(int) round($item->ep_utc), (float) round($item->eng1_econ, 2)]);
-
-    $myECON2 = DB::table('boatdata')
-        ->select(DB::raw('AVG(eng2_econ) as eng2_econ'), DB::raw('(UNIX_TIMESTAMP(CONCAT(date, " ", utc))*1000) as ep_utc'))
-        ->where('mac', $uid)
-        ->where('utc', '!=', '00:00:00')
-        ->whereTime('utc', '<=', '24:00:00')
-        ->where('sog', '>', 2)
-        ->where('eng2_econ', '>', 0)
-        ->whereBetween('date', [$start, $end])
-        ->groupBy('ep_utc')
-        ->limit(2000)
-        ->get()
-        ->map(fn($item) => [(int) round($item->ep_utc), (float) round($item->eng2_econ, 2)]);
-
-    $data = [
-        'myRPM1' => $myRPM1,
-        'myRPM2' => $myRPM2,
-        'myBOOST1' => $myBOOST1,
-        'myBOOST2' => $myBOOST2,
-        'myFUELR1' => $myFUELR1,
-        'myFUELR2' => $myFUELR2,
-        'myLOAD1' => $myLOAD1,
-        'myLOAD2' => $myLOAD2,
-        'mySOG' => $mySOG,
-        'myCOOLT1' => $myCOOLT1,
-        'myCOOLT2' => $myCOOLT2,
-        'myECON1' => $myECON1,
-        'myECON2' => $myECON2,
-    ];
-
-
-
-
-    return response()->json($data);
+    return response()->json(
+        $tripEngineService->getEngineSeries($uid, $start, $end)
+    );
 }
 
 
