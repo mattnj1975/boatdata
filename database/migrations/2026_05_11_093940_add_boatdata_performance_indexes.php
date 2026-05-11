@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
 {
-    Schema::table('boatdata', function (Blueprint $table) {
+   /** Schema::table('boatdata', function (Blueprint $table) {
         $table->index(
             ['mac', 'date', 'val', 'datetime'],
             'idx_boatdata_mac_date_val_datetime'
@@ -22,6 +22,7 @@ return new class extends Migration
             'idx_boatdata_mac_date_utc'
         );
     });
+	*/
 }
 
 public function down(): void

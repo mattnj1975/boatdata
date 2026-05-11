@@ -13,6 +13,7 @@ use App\Http\Controllers\UserBoatController;
 use App\Http\Controllers\TripsController;
 use App\Http\Controllers\BoatMapController;
 use App\Http\Controllers\FleetMapController;
+use App\Http\Controllers\BoatStatsController;
 
 use App\Http\Controllers\BoatActivityController;
 
@@ -30,6 +31,8 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::get('/boat-stats/{mac?}', [BoatStatsController::class, 'index']) ->name('boat.stats');
 
 Route::get('/boat-activity', [BoatActivityController::class, 'show']);
 
