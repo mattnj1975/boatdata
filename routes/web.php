@@ -14,6 +14,7 @@ use App\Http\Controllers\TripsController;
 use App\Http\Controllers\BoatMapController;
 use App\Http\Controllers\FleetMapController;
 use App\Http\Controllers\BoatStatsController;
+use App\Http\Controllers\BoatRawDataController;
 
 use App\Http\Controllers\BoatActivityController;
 
@@ -49,6 +50,8 @@ Route::post('/assets/ajax/get-speed-data', [TripsController::class, 'fetchSpeed'
 Route::post('/assets/ajax/get-engine-data', [TripsController::class, 'fetchEngine'])->name('admin.fetchEngine');
 Auth::routes();
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+Route::get('/boat-raw/{mac}/{range?}', [BoatRawDataController::class, 'show']) ->name('boat.raw');
 
 Route::get('/fleet-map/boats', [FleetMapController::class, 'boats'])->name('fleet.map.boats');
 Route::get('/fleet-map/data/{mac}/{days?}', [FleetMapController::class, 'boatData'])->name('fleet.map.boatData');

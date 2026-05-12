@@ -12,42 +12,28 @@ class BoatStatsController extends Controller
     {
         $year = (int) $request->get('year', now()->year);
 
-        $boats = DB::table('boatdata')
-            ->select('mac')
-            ->distinct()
-            ->orderBy('mac')
-            ->pluck('mac');
+        $boats = DB::table('settings')
+            ->where('public', 1)
+            ->whereNotNull('mac')
+            ->orderBy('boatname')
+            ->select('mac', 'boatname')
+            ->get();
 
-        $mac = $mac ?: $boats->first();
+        $mac = $mac ?: optional($boats->first())->mac;
 
         if (!$mac) {
-            return view('boat_stats', [
-                'boats' => collect(),
-                'mac' => null,
-                'year' => $year,
-                'summary' => null,
-                'daily' => collect(),
-                'monthly' => collect(),
-                'latest' => null,
-                'track' => collect(),
-                'totalMiles' => 0,
-                'status' => 'Offline',
-                'lastSeenAge' => 'No data',
-            ]);
+            abort(404);
         }
 
         $summary = DB::table('boatdata')
             ->where('mac', $mac)
             ->whereYear('date', $year)
             ->selectRaw('
-                MAX(NULLIF(sog, 0)) as top_speed,
-                AVG(NULLIF(sog, 0)) as avg_speed,
-                MAX(NULLIF(aws, 0)) as top_wind,
-                AVG(NULLIF(aws, 0)) as avg_wind,
-                COUNT(DISTINCT date) as days_used,
-                COUNT(*) as records,
-                MIN(CONCAT(date, " ", utc)) as first_seen,
-                MAX(CONCAT(date, " ", utc)) as last_seen
+                MAX(NULLIF(sog,0)) as top_speed,
+                AVG(NULLIF(sog,0)) as avg_speed,
+                MAX(NULLIF(aws,0)) as top_wind,
+                AVG(NULLIF(aws,0)) as avg_wind,
+                COUNT(DISTINCT date) as days_used
             ')
             ->first();
 
@@ -58,29 +44,27 @@ class BoatStatsController extends Controller
             ->orderBy('date')
             ->selectRaw('
                 date,
-                MAX(NULLIF(sog, 0)) as max_sog,
-                AVG(NULLIF(sog, 0)) as avg_sog,
-                MAX(NULLIF(aws, 0)) as max_aws,
-                AVG(NULLIF(aws, 0)) as avg_aws,
+                MAX(NULLIF(sog,0)) as max_sog,
+                AVG(NULLIF(sog,0)) as avg_sog,
+                MAX(NULLIF(aws,0)) as max_aws,
+                AVG(NULLIF(aws,0)) as avg_aws,
                 COUNT(*) as records
             ')
             ->get();
 
-$monthly = DB::table('boatdata')
-    ->where('mac', $mac)
-    ->whereYear('date', $year)
-    ->groupByRaw('MONTH(date)')
-    ->orderByRaw('MONTH(date)')
-    ->selectRaw('
-        MONTH(date) as month_num,
-        DATE_FORMAT(MIN(date), "%b") as month_name,
-        COUNT(DISTINCT date) as days_used,
-        MAX(NULLIF(sog, 0)) as max_sog,
-        AVG(NULLIF(sog, 0)) as avg_sog,
-        MAX(NULLIF(aws, 0)) as max_aws,
-        COUNT(*) as records
-    ')
-    ->get();
+        $monthly = DB::table('boatdata')
+            ->where('mac', $mac)
+            ->whereYear('date', $year)
+            ->groupByRaw('MONTH(date)')
+            ->orderByRaw('MONTH(date)')
+            ->selectRaw('
+                MONTH(date) as month_num,
+                DATE_FORMAT(MIN(date), "%b") as month_name,
+                COUNT(DISTINCT date) as days_used,
+                MAX(NULLIF(sog,0)) as max_sog,
+                AVG(NULLIF(sog,0)) as avg_sog
+            ')
+            ->get();
 
         $latest = DB::table('boatdata')
             ->where('mac', $mac)
@@ -90,37 +74,29 @@ $monthly = DB::table('boatdata')
             ->whereRaw('ABS(londec) > 0')
             ->orderByDesc('date')
             ->orderByDesc('utc')
-            ->select('latdec', 'londec', 'sog', 'cog', 'aws', 'date', 'utc')
+            ->select(
+                'latdec',
+                'londec',
+                'sog',
+                'cog',
+                'aws',
+                'date',
+                'utc'
+            )
             ->first();
-
-        $track = DB::table('boatdata')
-            ->where('mac', $mac)
-            ->whereNotNull('latdec')
-            ->whereNotNull('londec')
-            ->where('latdec', '!=', 0)
-            ->whereRaw('ABS(londec) > 0')
-            ->whereRaw("CONCAT(date, ' ', utc) >= DATE_SUB(NOW(), INTERVAL 7 DAY)")
-            ->orderBy('date')
-            ->orderBy('utc')
-            ->select('latdec', 'londec', 'sog', 'cog', 'date', 'utc')
-            ->limit(1500)
-            ->get();
 
         $totalMiles = DB::table(DB::raw("
             (
-                SELECT 
-                    date,
-                    utc,
+                SELECT
                     sog,
                     TIMESTAMPDIFF(
                         SECOND,
-                        LAG(CONCAT(date, ' ', utc)) OVER (ORDER BY date, utc),
-                        CONCAT(date, ' ', utc)
+                        LAG(CONCAT(date,' ',utc)) OVER (ORDER BY date,utc),
+                        CONCAT(date,' ',utc)
                     ) / 3600 AS hours_gap
                 FROM boatdata
                 WHERE mac = " . DB::getPdo()->quote($mac) . "
                 AND YEAR(date) = " . (int)$year . "
-                AND sog IS NOT NULL
                 AND sog BETWEEN 0.2 AND 50
             ) x
         "))
@@ -128,26 +104,84 @@ $monthly = DB::table('boatdata')
         ->selectRaw('SUM(sog * hours_gap) as miles')
         ->value('miles');
 
+        $deviceSettings = DB::table('settings')
+            ->where('mac', $mac)
+            ->select(
+                'boatname',
+                'serial',
+                'gprsuser',
+                'update_to',
+                'lastseen',
+                'version'
+            )
+            ->first();
+
         $status = 'Offline';
-        $lastSeenAge = 'No data';
+$lastSeenAge = 'Unknown';
 
-        if ($latest) {
-            try {
-                $lastSeen = Carbon::parse($latest->date . ' ' . $latest->utc);
-                $minutesAgo = $lastSeen->diffInMinutes(now());
-                $lastSeenAge = $lastSeen->diffForHumans();
+if ($deviceSettings && $deviceSettings->lastseen) {
 
-                if ($minutesAgo <= 30) {
-                    $status = 'Online';
-                } elseif ($minutesAgo <= 360) {
-                    $status = 'Stale';
-                } else {
-                    $status = 'Offline';
-                }
-            } catch (\Exception $e) {
-                $status = 'Unknown';
-            }
+    try {
+
+        $lastSeen = Carbon::parse($deviceSettings->lastseen);
+
+        $mins = $lastSeen->diffInMinutes(now());
+
+        $lastSeenAge = $lastSeen->diffForHumans();
+
+        if ($mins <= 15) {
+
+            $status = 'Online';
+
+        } elseif ($mins <= 120) {
+
+            $status = 'Idle';
+
+        } elseif ($mins <= 1440) {
+
+            $status = 'Stale';
         }
+
+    } catch (\Exception $e) {
+    }
+}
+
+
+
+        $uploadLogs = DB::table('uploadlog')
+            ->where('device_id', $mac)
+            ->orderByDesc('uload_time')
+            ->limit(50)
+            ->select(
+                'uload_time',
+                'upload_status',
+                'ip_address',
+                'sd_space',
+                'sd_used',
+                'db_ok',
+                'db_err'
+            )
+            ->get();
+
+        $uploadStatusCodes = [
+            0 => 'Success',
+            1 => 'UnknownErr',
+            2 => 'FileSmall',
+            3 => 'NoServer',
+            4 => 'NoWiFi',
+            5 => 'APIwrong',
+            6 => 'noEOF',
+            7 => 'Timeout',
+            8 => 'Disabled',
+            9 => 'Ready',
+            10 => 'Booting',
+            11 => 'NoDate',
+            12 => 'NoSDCard',
+            13 => 'GPRSPostErr',
+            14 => 'NoGPRS',
+            15 => 'Reboot',
+            16 => 'GPSReboot',
+        ];
 
         return view('boat_stats', [
             'boats' => $boats,
@@ -157,10 +191,12 @@ $monthly = DB::table('boatdata')
             'daily' => $daily,
             'monthly' => $monthly,
             'latest' => $latest,
-            'track' => $track,
             'totalMiles' => $totalMiles ?? 0,
             'status' => $status,
             'lastSeenAge' => $lastSeenAge,
+            'deviceSettings' => $deviceSettings,
+            'uploadLogs' => $uploadLogs,
+            'uploadStatusCodes' => $uploadStatusCodes,
         ]);
     }
 }
