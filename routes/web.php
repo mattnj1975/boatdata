@@ -15,6 +15,7 @@ use App\Http\Controllers\BoatMapController;
 use App\Http\Controllers\FleetMapController;
 use App\Http\Controllers\BoatStatsController;
 use App\Http\Controllers\BoatRawDataController;
+use App\Http\Controllers\BoatInsureController;
 
 use App\Http\Controllers\BoatActivityController;
 
@@ -52,6 +53,8 @@ Auth::routes();
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::get('/boat-raw/{mac}/{range?}', [BoatRawDataController::class, 'show']) ->name('boat.raw');
+
+Route::get('/boat-insure/{mac}', [BoatInsureController::class, 'show'])  ->name('boat.insure');
 
 Route::get('/fleet-map/boats', [FleetMapController::class, 'boats'])->name('fleet.map.boats');
 Route::get('/fleet-map/data/{mac}/{days?}', [FleetMapController::class, 'boatData'])->name('fleet.map.boatData');
