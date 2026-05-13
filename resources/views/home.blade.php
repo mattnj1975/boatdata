@@ -326,45 +326,6 @@ table tbody tr:hover {
                     </table>
                 </div>
             </div>
-            <div class="tab-content" id="logData">
-                <div class="tab-pane fade" id="log-tab-pane" role="tabpanel" aria-labelledby="log-tab" tabindex="0" style="padding-top:15px;">
-                    <div id="map" style="width: 100%; height: 400px;"></div>
-                    <div class="d-none" id="no-data-alert">No position data available</div>
-                </div>
-                <div class="tab-pane fade table table-responsive" id="log-tab-pane" role="tabpanel" aria-labelledby="log-tab" tabindex="0" style="padding-top:15px;">
-                    <table id="data" class="display">
-                        <thead>
-                            <tr>
-                                <th style="min-width:50px;max-width:50px;">Time (UTC)</th>
-                                <th style="">Vessel <br />Position</th>
-                                <th style="min-width:55px;max-width:55px;">SOG</th>
-                                <th style="min-width:60px;max-width:60px;">COG</th>
-                                <th style="min-width:50px;max-width:50px;">Depth</th>
-                                <th style="min-width:65px;max-width:65px;">Heading</th>
-                                <th style="min-width:50px;max-width:50px;">Speed</th>
-                                <th style="min-width:70px;max-width:70px;">App Wind</th>
-                            </tr>
-                        </thead>
-                        <tbody id="log-data-table-body">
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
         </div>
     </div>
 </div>
@@ -390,48 +351,50 @@ table tbody tr:hover {
     document.addEventListener('DOMContentLoaded', function() {
         var currentPage = 1;
         var rowsPerPage = 5;
-        var data = []; // Store the fetched data
+        var data = [];
 
         document.getElementById('searchForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
             var submitButton = document.getElementById('searchButton');
             submitButton.disabled = true;
-            var buttonContent = submitButton.innerHTML;
-            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span></span>';
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
 
-            // Clear previous search results and boat details
             currentPage = 1;
             data = [];
             document.getElementById('searchResults').innerHTML = '';
-			const fleetStatusWrapper = document.getElementById('fleetStatusWrapper');
-if (fleetStatusWrapper) {
-    fleetStatusWrapper.style.display = 'none';
-}
+            document.getElementById('paginationContainer').innerHTML = '';
+            document.getElementById('entryCount').innerHTML = '';
 
-            var formData = new FormData(this);
+            const fleetStatusWrapper = document.getElementById('fleetStatusWrapper');
+            if (fleetStatusWrapper) {
+                fleetStatusWrapper.style.display = 'none';
+            }
+
+            $('#boat_details').hide();
+            $('#gauge_chart').hide();
+            $('#myTab').addClass('d-none');
 
             fetch(this.action, {
                 method: 'POST',
-                body: formData,
+                body: new FormData(this),
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
                 }
             })
             .then(response => response.json())
             .then(result => {
-                data = result;
+                data = Array.isArray(result) ? result : [];
                 renderTable();
-                renderPagination();
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Search error:', error);
+                document.getElementById('searchResults').innerHTML = '<div class="alert alert-danger mb-0">Search failed. Check the Laravel log or browser console.</div>';
             })
             .finally(() => {
                 submitButton.disabled = false;
                 submitButton.innerHTML = 'Search';
-                $('#boat_details').hide();
-                $('#gauge_chart').hide();
             });
         });
 
@@ -440,15 +403,39 @@ if (fleetStatusWrapper) {
             var endIndex = startIndex + rowsPerPage;
             var displayedData = data.slice(startIndex, endIndex);
 
-            var tableHTML = '<div class="table-responsive"><table class="table table-hover table-bordered trip-results-table"><thead><tr><th></th><th>Boat Name</th><th>Trip Date</th><th>Start</th><th>Finish</th><th>Duration</th><th>Distance</th></tr></thead><tbody>';
+            var tableHTML = '' +
+                '<div class="table-responsive">' +
+                    '<table class="table table-hover table-bordered trip-results-table">' +
+                        '<thead>' +
+                            '<tr>' +
+                                '<th></th>' +
+                                '<th>Boat Name</th>' +
+                                '<th>Trip Date</th>' +
+                                '<th>Start</th>' +
+                                '<th>Finish</th>' +
+                                '<th>Duration</th>' +
+                                '<th>Distance</th>' +
+                            '</tr>' +
+                        '</thead>' +
+                        '<tbody>';
 
             displayedData.forEach(function(item) {
                 var tripDate = new Date(item.TripDate);
                 var formattedTripDate = ('0' + tripDate.getDate()).slice(-2) + '/' + ('0' + (tripDate.getMonth() + 1)).slice(-2) + '/' + tripDate.getFullYear();
+
                 tableHTML += '<tr>';
-                tableHTML += '<td><div class="d-flex btn-group-lg" role="group" ><i style="cursor: pointer;" class="fa fa-solid fa-map viewLink viewTrack" title="Click here then scroll down"></i><br><i style="cursor: pointer;" class="fa fa-solid fa-table viewLink viewData" title="Click here then scroll down"></i></div></td>';
-				tableHTML += '<td>' + item.boatname + ' </br>(<a href="{{ url('/boat-map') }}/' + encodeURIComponent(item.mac) + '" title="Click to show all trips"><small data-mac="' + item.mac + '">' + item.mac + '</small></a>)</td>';
-                tableHTML += '<td>' + (item.Finish ? item.Finish : 'N/A') + '</td>';
+                tableHTML += '<td><div class="d-flex btn-group-lg" role="group">' +
+                    '<i style="cursor: pointer;" class="fa fa-solid fa-map viewLink viewTrack" title="Show track"></i>&nbsp;&nbsp;&nbsp;' +
+                    '<i style="cursor: pointer;" class="fa fa-solid fa-table viewLink viewData" title="Show data"></i>' +
+                    '</div></td>';
+
+                tableHTML += '<td>' + (item.boatname ?? 'Unknown') + '<br>(' +
+                    '<a href="{{ url('/boat-map') }}/' + encodeURIComponent(item.mac) + '" title="Click to show all trips">' +
+                    '<small data-mac="' + item.mac + '">' + item.mac + '</small></a>)</td>';
+
+                tableHTML += '<td data-date="' + formattedTripDate + '">' + formattedTripDate + '</td>';
+                tableHTML += '<td>' + (item.Begin ? item.Begin : 'na') + '</td>';
+                tableHTML += '<td>' + (item.Finish ? item.Finish : 'na') + '</td>';
 
                 if (item.Begin && item.Finish) {
                     var beginTime = new Date(item.TripDate + ' ' + item.Begin);
@@ -456,101 +443,63 @@ if (fleetStatusWrapper) {
                     var durationInMinutes = Math.round((finishTime - beginTime) / (1000 * 60));
                     var hours = Math.floor(durationInMinutes / 60);
                     var minutes = durationInMinutes % 60;
-                    var duration = hours + 'h ' + minutes + 'm';
-                    tableHTML += '<td>' + duration + '</td>';
+                    tableHTML += '<td>' + hours + 'h ' + minutes + 'm</td>';
                 } else {
-                    tableHTML += '<td>N/A</td>';
+                    tableHTML += '<td>na</td>';
                 }
 
-                tableHTML += '<td>' + (item.Trip ? item.Trip : 'N/A') + '</td>';
-                //tableHTML += '<td><div class="d-flex btn-group-lg" role="group" aria-label="Basic example"><i style="cursor: pointer;" class="fa fa-solid fa-map viewLink viewTrack" title="Track"></i>&nbsp;&nbsp;&nbsp;<i style="cursor: pointer;" class="fa fa-solid fa-table viewLink viewData" title="Data"></i></div></td>';
+                tableHTML += '<td>' + (item.Trip ? item.Trip : 'na') + '</td>';
                 tableHTML += '</tr>';
             });
 
             tableHTML += '</tbody></table></div>';
             document.getElementById('searchResults').innerHTML = tableHTML;
 
-            // Show count of entries
+            renderPagination();
+            renderEntryCount();
+        }
+
+        function renderPagination() {
+            var totalPages = Math.ceil(data.length / rowsPerPage);
+            var paginationHTML = '<nav aria-label="Page navigation"><ul class="pagination">';
+
+            paginationHTML += '<li class="page-item' + (currentPage === 1 ? ' disabled' : '') + '"><a class="page-link" href="#" data-page="prev">Previous</a></li>';
+
+            for (var i = 1; i <= totalPages; i++) {
+                paginationHTML += '<li class="page-item' + (currentPage === i ? ' active' : '') + '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
+            }
+
+            paginationHTML += '<li class="page-item' + (currentPage === totalPages || totalPages === 0 ? ' disabled' : '') + '"><a class="page-link" href="#" data-page="next">Next</a></li>';
+            paginationHTML += '</ul></nav>';
+
+            document.getElementById('paginationContainer').innerHTML = paginationHTML;
+        }
+
+        function renderEntryCount() {
             var totalCount = data.length;
-            var fromIndex = Math.min(startIndex + 1, totalCount);
-            var toIndex = Math.min(endIndex, totalCount);
+            var fromIndex = totalCount === 0 ? 0 : Math.min((currentPage - 1) * rowsPerPage + 1, totalCount);
+            var toIndex = Math.min((currentPage - 1) * rowsPerPage + rowsPerPage, totalCount);
             document.getElementById('entryCount').innerHTML = 'Showing ' + fromIndex + ' to ' + toIndex + ' of ' + totalCount + ' entries';
         }
 
-function renderPagination() {
-    var totalPages = Math.ceil(data.length / rowsPerPage);
-
-    var paginationHTML = '<nav aria-label="Page navigation"><ul class="pagination">';
-
-    // Previous button
-    paginationHTML += '<li class="page-item ' + (currentPage === 1 ? 'disabled' : '') + 
-                      '"><a class="page-link" href="#" data-page="' + (currentPage - 1) + '">Previous</a></li>';
-
-    if (totalPages <= 20) {
-        // Show all pages if totalPages <= 20
-        for (var i = 1; i <= totalPages; i++) {
-            paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + 
-                              '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
-        }
-    } else {
-        // Show first 3 pages always
-        for (var i = 1; i <= 3; i++) {
-            paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + 
-                              '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
-        }
-
-        // Ellipsis if currentPage > 5 (means pages hidden after 3)
-        if (currentPage > 5) {
-            paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
-        }
-
-        // Pages around the current page
-        var startPage = Math.max(4, currentPage - 1);
-        var endPage = Math.min(totalPages - 3, currentPage + 1);
-
-        for (var i = startPage; i <= endPage; i++) {
-            if (i > 3 && i < totalPages - 2) {
-                paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + 
-                                  '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
-            }
-        }
-
-        // Ellipsis if currentPage < totalPages - 4 (means pages hidden before last 3)
-        if (currentPage < totalPages - 4) {
-            paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
-        }
-
-        // Show last 3 pages always
-        for (var i = totalPages - 2; i <= totalPages; i++) {
-            paginationHTML += '<li class="page-item ' + (i === currentPage ? 'active' : '') + 
-                              '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
-        }
-    }
-
-    // Next button
-    paginationHTML += '<li class="page-item ' + (currentPage === totalPages ? 'disabled' : '') + 
-                      '"><a class="page-link" href="#" data-page="' + (currentPage + 1) + '">Next</a></li>';
-
-    paginationHTML += '</ul></nav>';
-
-    document.getElementById('paginationContainer').innerHTML = paginationHTML;
-
-    // Add event listeners to pagination links
-    document.querySelectorAll('.pagination .page-link').forEach(function(link) {
-        link.addEventListener('click', function(event) {
+        document.getElementById('paginationContainer').addEventListener('click', function(event) {
             event.preventDefault();
-            var page = parseInt(this.getAttribute('data-page'));
-            if (!isNaN(page) && page >= 1 && page <= totalPages) {
-                currentPage = page;
-                renderTable();
-                renderPagination();
+            if (!event.target.matches('.page-link')) return;
+
+            var page = event.target.getAttribute('data-page');
+            var totalPages = Math.ceil(data.length / rowsPerPage);
+
+            if (page === 'prev' && currentPage > 1) {
+                currentPage--;
+            } else if (page === 'next' && currentPage < totalPages) {
+                currentPage++;
+            } else if (!isNaN(page)) {
+                currentPage = parseInt(page, 10);
             }
+
+            renderTable();
         });
     });
-}
-
-    });
-
 
     $(document).ready(function() {
         document.getElementById("speed-tab").onclick = loadSpeed;
