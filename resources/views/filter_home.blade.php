@@ -20,6 +20,17 @@
         letter-spacing: .3px;
         margin-bottom: 4px;
     }
+	
+	#tableBody td {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    vertical-align: middle;
+    font-size: 13px;
+}
+
+#tableBody tr {
+    height: 34px;
+}
 
     .marine-subtitle {
         color: #b8d4e8;
@@ -352,12 +363,34 @@
 
                 var row = '<tr>' +
 				'<td>' +
-                            '<div class="d-flex btn-group-lg" role="group" >' +
-                                '<i style="cursor: pointer;" class="fa fa-solid fa-map viewLink viewTrack" title="Click here then scroll down"></i>&nbsp;&nbsp;&nbsp;' +
-                                
-                            '</div>' +
-                        '</td>' +
-                            '<td>' + item['boatname'] + ' <br> (<a href="/app/map/index.php?uid=' + item['mac'] + '"><small data-mac="' + item['mac'] + '">' + item['mac'] + '</small></a>)</td>' +
+    '<div class="d-flex btn-group-lg align-items-center" role="group" style="gap:12px;">' +
+
+      '<a href="javascript:void(0);" title="Show track below" style="color:#0d6efd;">' +
+    '<i style="cursor:pointer;" class="fa fa-map viewLink viewTrack"></i>' +
+'</a>' +
+
+        '<a href="/view/boat-map/' + item['mac'] + '" title="Full Map">' +
+            '<i class="fa fa-globe"></i>' +
+        '</a>' +
+
+        '<a href="/view/boat-stats/' + item['mac'] + '" title="Dashboard">' +
+            '<i class="fa fa-dashboard"></i>' +
+        '</a>' +
+
+        '<a href="/view/boat-insure/' + item['mac'] + '" title="Insurance">' +
+            '<i class="fa fa-shield"></i>' +
+        '</a>' +
+
+        '<a href="/view/trips?mac=' + item['mac'] + '&status=auto" title="Trips">' +
+            '<i class="fa fa-ship"></i>' +
+        '</a>' +
+
+    '</div>' +
+'</td>' +
+'<td>' +
+    '<strong>' + item['boatname'] + '</strong>' +
+    '<small data-mac="' + item['mac'] + '" style="display:none;">' + item['mac'] + '</small>' +
+'</td>' +
                             '<td data-date="' + formattedTripDate + '">' + formattedTripDate + '</td>' +
                             '<td>' + (item['Begin'] ? item['Begin'] : 'na') + '</td>' +
                             '<td>' + (item['Finish'] ? item['Finish'] : 'na') + '</td>';

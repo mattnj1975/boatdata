@@ -49,7 +49,7 @@
                     $('#current_passwordError').text(response.Message);
                 }else if(response.isSuccess == true){
                     setTimeout(function () {
-                        window.location.href = "{{ route('home') }}";
+                        window.location.href = "{{ url('/') }}"
                     }, 1000);
                 }
             },

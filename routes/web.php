@@ -16,8 +16,10 @@ use App\Http\Controllers\FleetMapController;
 use App\Http\Controllers\BoatStatsController;
 use App\Http\Controllers\BoatRawDataController;
 use App\Http\Controllers\BoatInsureController;
+use App\Http\Controllers\BoatTripController;
+use App\Http\Controllers\TripDetectionConfigController;
 
-use App\Http\Controllers\BoatActivityController;
+
 
 use Google\Service\AIPlatformNotebooks\Event;
 use Google\Service\AlertCenter\UserChanges;
@@ -34,9 +36,26 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 |
 */
 
-Route::get('/boat-stats/{mac?}', [BoatStatsController::class, 'index']) ->name('boat.stats');
 
-Route::get('/boat-activity', [BoatActivityController::class, 'show']);
+Route::middleware(['auth'])->group(function () {
+    Route::get('/trips', [BoatTripController::class, 'index'])->name('trips.index');
+    Route::get('/trips/{trip}', [BoatTripController::class, 'show'])->name('trips.show');
+    Route::get('/trips/{trip}/edit', [BoatTripController::class, 'edit'])->name('trips.edit');
+    Route::put('/trips/{trip}', [BoatTripController::class, 'update'])->name('trips.update');
+
+    Route::post('/trips/{trip}/confirm', [BoatTripController::class, 'confirm'])->name('trips.confirm');
+    Route::post('/trips/{trip}/ignore', [BoatTripController::class, 'ignore'])->name('trips.ignore');
+    Route::post('/trips/{trip}/merge-next', [BoatTripController::class, 'mergeNext'])->name('trips.merge-next');
+    Route::delete('/trips/{trip}', [BoatTripController::class, 'destroy'])->name('trips.destroy');
+	Route::get('/trips/{trip}/boundary-data', [BoatTripController::class, 'boundaryData'])->name('trips.boundary-data');
+	Route::post('/trips/{trip}/save-boundary', [BoatTripController::class, 'saveBoundary'])->name('trips.save-boundary');
+	Route::get('/trips/{trip}/nudge-record', [BoatTripController::class, 'nudgeRecord'])->name('trips.nudge-record');
+    Route::get('/trip-settings', [TripDetectionConfigController::class, 'edit'])->name('trip-settings.edit');
+    Route::put('/trip-settings', [TripDetectionConfigController::class, 'update'])->name('trip-settings.update');
+});
+
+
+Route::get('/boat-stats/{mac}', [BoatStatsController::class, 'index']) ->name('boat.stats');
 
 Route::get('/', [HomeController::class, 'searchPage'])->name('search');
 Route::post('/search', [HomeController::class, 'searchMac'])->name('search.mac');
@@ -50,7 +69,7 @@ Route::post('/assets/ajax/get-table-data', [TripsController::class, 'getTableDat
 Route::post('/assets/ajax/get-speed-data', [TripsController::class, 'fetchSpeed'])->name('admin.fetchSpeed');
 Route::post('/assets/ajax/get-engine-data', [TripsController::class, 'fetchEngine'])->name('admin.fetchEngine');
 Auth::routes();
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+
 
 Route::get('/boat-raw/{mac}/{range?}', [BoatRawDataController::class, 'show']) ->name('boat.raw');
 

@@ -1,9 +1,45 @@
 @extends('layouts.app')
 
 @section('content')
+
+<div id="loadingOverlay" style="
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.88);
+    color: white;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-family: sans-serif;
+">
+    <div style="
+        width: 54px;
+        height: 54px;
+        border: 6px solid rgba(255,255,255,0.25);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 18px;
+    "></div>
+
+    <div style="font-size: 20px; font-weight: 700;">
+        Processing boat data...
+    </div>
+
+    <div style="font-size: 14px; opacity: 0.8; margin-top: 6px;">
+        Large date ranges may take a while.
+    </div>
+</div>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
 <style>
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
     body {
         background: #f3f6fb;
     }
@@ -350,5 +386,21 @@ function drawLineWithPopup(points, color) {
 nightTracks.forEach(segment => drawLineWithPopup(segment, "orange"));
 sogDepTracks.forEach(segment => drawLineWithPopup(segment, "red"));
 awsTracks.forEach(segment => drawLineWithPopup(segment, "black"));
+
+setTimeout(function () {
+    document.getElementById('loadingOverlay').style.display = 'none';
+}, 300);
+
+document.querySelectorAll('form').forEach(function (form) {
+    form.addEventListener('submit', function () {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+    });
+});
+
+document.querySelectorAll('a').forEach(function (link) {
+    link.addEventListener('click', function () {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+    });
+});
 </script>
 @endsection

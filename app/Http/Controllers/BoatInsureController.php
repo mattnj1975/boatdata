@@ -10,16 +10,17 @@ class BoatInsureController extends Controller
 {
     public function show(Request $request, string $mac)
     {
-        $range = $request->get('range', '30');
+        $range = $request->get('range', '7');
 
-        $rangeOptions = [
-            '30' => 'Last 30 Days',
-            '60' => 'Last 60 Days',
-            '120' => 'Last 120 Days',
-            '180' => 'Last 6 Months',
-            '365' => 'Last Year',
-            'all' => 'All Time',
-        ];
+$rangeOptions = [
+    '7' => 'Last 7 Days',
+    '30' => 'Last 30 Days',
+    '60' => 'Last 60 Days',
+    '120' => 'Last 120 Days',
+    '180' => 'Last 6 Months',
+    '365' => 'Last Year',
+    'all' => 'All Time',
+];
 
         if (!isset($rangeOptions[$range])) {
             $range = '30';
@@ -84,14 +85,24 @@ class BoatInsureController extends Controller
             }
         }
 
-        $trackRows = (clone $baseQuery)
-            ->select('latdec', 'londec', 'datetime', 'sog', 'dep', 'aws')
-            ->whereNotNull('latdec')
-            ->whereNotNull('londec')
-            ->whereNotNull('sog')
-            ->orderBy('datetime')
-            ->limit(15000)
-            ->get();
+$trackSql = "
+    SELECT latdec, londec, datetime, sog, dep, aws
+    FROM boatdata
+    WHERE mac = ?
+    AND val = 'A'
+    AND sog IS NOT NULL
+";
+
+$params = [$mac];
+
+if ($range !== 'all') {
+    $trackSql .= " AND datetime >= NOW() - INTERVAL ? DAY";
+    $params[] = (int)$range;
+}
+
+$trackSql .= " ORDER BY datetime ASC";
+
+$trackRows = DB::select($trackSql, $params);
 
         $nightTracks = [];
         $sogDepTracks = [];
@@ -108,15 +119,30 @@ class BoatInsureController extends Controller
 
             $tooltip = "{$dt->format('Y-m-d H:i:s')} | SOG: {$row->sog} | DEP: {$row->dep} | AWS: {$row->aws}";
 
-            $sun = date_sun_info($dt->timestamp, $lat, $lon);
-            $isNight = $dt->timestamp < $sun['sunrise'] || $dt->timestamp > $sun['sunset'];
+            static $sunCache = [];
+
+$cacheKey = $dt->format('Y-m-d');
+
+if (!isset($sunCache[$cacheKey])) {
+    $sunCache[$cacheKey] = date_sun_info(
+        strtotime($cacheKey . ' 12:00:00'),
+        $lat,
+        $lon
+    );
+}
+
+$sun = $sunCache[$cacheKey];
+
+$isNight =
+    $dt->timestamp < $sun['sunrise'] ||
+    $dt->timestamp > $sun['sunset'];
 
             $isSogDep = $row->sog > $sogThreshold
                 && is_numeric($row->dep)
                 && $row->dep >= 0
                 && $row->dep < $depThreshold;
 
-            $isAws = is_numeric($row->aws) && $row->aws > $awsThreshold;
+            $isAws = ($row->aws > $awsThreshold);
 
             $point = ['lat' => $lat, 'lon' => $lon, 'tip' => $tooltip];
 

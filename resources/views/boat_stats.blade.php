@@ -82,21 +82,7 @@
 
         <form method="GET" class="d-flex gap-2">
 
-            <select
-                class="form-select"
-                onchange="location.href='{{ url('boat-stats') }}/' + this.value + '?year={{ $year }}'"
-            >
-                @foreach($boats as $boat)
 
-                    <option
-                        value="{{ $boat->mac }}"
-                        @selected($boat->mac === $mac)
-                    >
-                        {{ $boat->boatname }} — {{ $boat->mac }}
-                    </option>
-
-                @endforeach
-            </select>
 
             <input
                 type="number"
