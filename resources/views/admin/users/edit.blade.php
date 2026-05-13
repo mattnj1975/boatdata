@@ -1,94 +1,185 @@
 @extends('layouts.admin')
+
 @isset($user)
-@section('title', 'Edit User')
+    @section('title', 'Edit User')
 @else
-@section('title', 'Add User')
+    @section('title', 'Add User')
 @endisset
+
 @section('content')
 
-<div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            @isset($user)
-            <h4 class="mb-sm-0 font-size-18">Edit User</h4>
-            @else
-            <h4 class="mb-sm-0 font-size-18">Add New User</h4>
-            @endisset
-            {{-- {{ $errors }}--}}
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Dashboard</a></li>
-                    <li class="breadcrumb-item active">User</li>
-                    @isset($user)
-                    <li class="breadcrumb-item active">Edit User</li>
-                    @else
-                    <li class="breadcrumb-item active">Add New User</li>
-                    @endisset
-                </ol>
-            </div>
+<style>
+    .bd-page-header { margin-bottom:20px; }
+    .bd-title { color:#f8fafc; font-size:24px; font-weight:800; margin:0; }
+    .bd-subtitle { color:#94a3b8; font-size:13px; margin-top:4px; }
 
-        </div>
-    </div>
-</div>
+    .bd-card {
+        background:#111827;
+        border:1px solid rgba(148,163,184,.18);
+        border-radius:18px;
+        box-shadow:0 16px 40px rgba(0,0,0,.22);
+        padding:24px;
+        color:#e5e7eb;
+    }
 
-<div class="card p-4 rounded cShadow container-fluid">
+    .bd-label {
+        color:#cbd5e1;
+        font-size:13px;
+        font-weight:700;
+        margin-bottom:7px;
+    }
+
+    .bd-input {
+        background:#0f172a !important;
+        border:1px solid rgba(148,163,184,.22) !important;
+        color:#f8fafc !important;
+        border-radius:12px !important;
+        min-height:46px;
+    }
+
+    .bd-input:focus {
+        border-color:#3b82f6 !important;
+        box-shadow:0 0 0 .18rem rgba(59,130,246,.18) !important;
+    }
+
+    .bd-save-btn {
+        background:linear-gradient(135deg,#2563eb,#3b82f6);
+        border:none;
+        border-radius:12px;
+        padding:12px 22px;
+        color:#fff;
+        font-weight:800;
+    }
+
+    .bd-save-btn:hover {
+        color:#fff;
+        transform:translateY(-1px);
+        box-shadow:0 10px 22px rgba(37,99,235,.25);
+    }
+
+    .invalid-feedback {
+        color:#f87171;
+        font-size:12px;
+    }
+
+    .form-switch .form-check-input {
+        cursor:pointer;
+    }
+
+    .bd-status-text {
+        color:#94a3b8;
+        font-size:13px;
+    }
+</style>
+
+<div class="bd-page-header">
     @isset($user)
-    <form action="{{ route('users.update', $user->id) }}" method="post" enctype="multipart/form-data">
-        @method('PUT')
-        @else
-        <form action="{{ route('users.store') }}" method="post" enctype="multipart/form-data">
-            @endisset
-            @csrf
-            <div class="row">
-
-                <div class="form-group col-sm-6 mb-2">
-                    <label for="">Name<span class="text-danger">*</span></label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="name" @isset($user)value="{{$user->name}}" @endisset placeholder="Enter Name">
-                    </div>
-                    @error('name')
-                    <span class="invalid-feedback mt-0" @error('name')style="display: block" @enderror role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror
-                </div>
-                <div class="form-group col-sm-6 mb-2">
-                    <label for="">Email<span class="text-danger">*</span></label>
-                    <div class="input-group">
-                        <input type="email" class="form-control" name="email" @isset($user)value="{{$user->email}}" @endisset placeholder="Enter Email">
-                    </div>
-                    @error('email')
-                    <span class="invalid-feedback mt-0" @error('email')style="display: block" @enderror role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror
-                </div>
-                <div class="form-group col-sm-6 mb-2">
-                    <label for="">Password<span class="text-danger">*</span></label>
-                    <div class="input-group">
-                        <input type="password" class="form-control" name="password" placeholder="Enter Password">
-                    </div>
-                    @error('password')
-                    <span class="invalid-feedback mt-0" @error('password')style="display: block" @enderror role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror
-                </div>
-                <div class="form-group col-sm-6 mb-2 d-flex align-items-end">
-
-                    <label for="switch4" data-on-label="Yes" data-off-label="No">
-                        <label for="">Status: </label>
-                        <div class="form-check form-switch form-switch-lg mb-3" dir="ltr">
-
-                            <input class="form-check-input" name="status" type="checkbox" id="SwitchCheckSizelg" @if(isset($user) && $user->active == 1) checked="" @endif>
-                        </div>
-                    </label>
-                </div>
-                <div class="form-group col-sm-12 mb-2">
-                    <input type="submit" value="Submit" class="btn btn-primary btn-sm">
-                </div>
-
-            </div>
-        </form>
+        <h1 class="bd-title">Edit User</h1>
+        <div class="bd-subtitle">Update user details and account status.</div>
+    @else
+        <h1 class="bd-title">Add New User</h1>
+        <div class="bd-subtitle">Create a new user account.</div>
+    @endisset
 </div>
+
+<div class="bd-card">
+    @isset($user)
+        <form action="{{ route('users.update', $user->id) }}" method="post" enctype="multipart/form-data">
+        @method('PUT')
+    @else
+        <form action="{{ route('users.store') }}" method="post" enctype="multipart/form-data">
+    @endisset
+
+        @csrf
+
+        <div class="row g-3">
+            <div class="form-group col-sm-6">
+                <label class="bd-label">Name <span class="text-danger">*</span></label>
+                <input
+                    type="text"
+                    class="form-control bd-input"
+                    name="name"
+                    @isset($user)value="{{ $user->name }}"@endisset
+                    placeholder="Enter name"
+                >
+
+                @error('name')
+                    <span class="invalid-feedback d-block mt-1">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+
+            <div class="form-group col-sm-6">
+                <label class="bd-label">Email <span class="text-danger">*</span></label>
+                <input
+                    type="email"
+                    class="form-control bd-input"
+                    name="email"
+                    @isset($user)value="{{ $user->email }}"@endisset
+                    placeholder="Enter email"
+                >
+
+                @error('email')
+                    <span class="invalid-feedback d-block mt-1">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+
+            <div class="form-group col-sm-6">
+                <label class="bd-label">
+                    Password
+                    @empty($user)
+                        <span class="text-danger">*</span>
+                    @endempty
+                </label>
+
+                <input
+                    type="password"
+                    class="form-control bd-input"
+                    name="password"
+                    placeholder="@isset($user)Leave blank to keep current password @else Enter password @endisset"
+                >
+
+                @error('password')
+                    <span class="invalid-feedback d-block mt-1">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+
+            <div class="form-group col-sm-6 d-flex align-items-end">
+                <div>
+                    <label class="bd-label d-block">Status</label>
+
+                    <div class="form-check form-switch form-switch-lg" dir="ltr">
+                        <input
+                            class="form-check-input"
+                            name="status"
+                            type="checkbox"
+                            id="SwitchCheckSizelg"
+                            @if(isset($user) && $user->active == 1) checked @endif
+                        >
+                        <label class="form-check-label bd-status-text" for="SwitchCheckSizelg">
+                            Active user
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 mt-3">
+                <button type="submit" class="btn bd-save-btn">
+                    <i class="fas fa-save me-2"></i>
+                    @isset($user)
+                        Save Changes
+                    @else
+                        Create User
+                    @endisset
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
 @endsection

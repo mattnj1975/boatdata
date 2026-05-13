@@ -1,144 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-	<title> ADMIN LOGIN | {{ env("APP_NAME")  }} </title>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<!--===============================================================================================-->
-	<link rel="icon" type="image/png" href="login_assets/images/icons/favicon.ico" />
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="login_assets/vendor/bootstrap/css/bootstrap.min.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="login_assets/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="login_assets/fonts/Linearicons-Free-v1.0.0/icon-font.min.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="login_assets/vendor/animate/animate.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="login_assets/vendor/css-hamburgers/hamburgers.min.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="login_assets/vendor/animsition/css/animsition.min.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="login_assets/vendor/select2/select2.min.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="login_assets/vendor/daterangepicker/daterangepicker.css">
-	<!--===============================================================================================-->
-	<link rel="stylesheet" type="text/css" href="login_assets/css/util.css">
-	<link rel="stylesheet" type="text/css" href="login_assets/css/main.css">
-	<!--===============================================================================================-->
+    <title>Login | {{ env('APP_NAME') }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<style>
-		.loader {
-			border: 4px solid #f3f3f3;
-			border-top: 4px solid #3498db;
-			border-radius: 50%;
-			width: 20px;
-			height: 20px;
-			animation: spin 1s linear infinite;
-			display: none;
-			/* Initially hide the loader */
-		}
+    <link rel="icon" type="image/png" href="{{ asset('login_assets/images/icons/favicon.ico') }}" />
+    <link rel="stylesheet" href="{{ asset('login_assets/vendor/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('login_assets/fonts/font-awesome-4.7.0/css/font-awesome.min.css') }}">
 
-		@keyframes spin {
-			0% {
-				transform: rotate(0deg);
-			}
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            background:
+                radial-gradient(circle at top left, rgba(59,130,246,.28), transparent 35%),
+                radial-gradient(circle at bottom right, rgba(14,165,233,.18), transparent 35%),
+                linear-gradient(135deg, #020617, #0f172a);
+            color: #e5e7eb;
+            font-family: Arial, sans-serif;
+        }
 
-			100% {
-				transform: rotate(360deg);
-			}
-		}
-	</style>
+        .bd-login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
 
+        .bd-login-card {
+            width: 100%;
+            max-width: 430px;
+            background: rgba(17, 24, 39, .92);
+            border: 1px solid rgba(148, 163, 184, .18);
+            border-radius: 24px;
+            box-shadow: 0 24px 70px rgba(0,0,0,.45);
+            padding: 34px;
+        }
+
+        .bd-logo {
+            width: 58px;
+            height: 58px;
+            border-radius: 18px;
+            background: rgba(59,130,246,.16);
+            color: #60a5fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            margin-bottom: 22px;
+        }
+
+        .bd-title {
+            color: #fff;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .bd-subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 26px;
+        }
+
+        .bd-label {
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+
+        .bd-input {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid rgba(148, 163, 184, .24);
+            color: #f8fafc;
+            border-radius: 14px;
+            padding: 13px 15px;
+            min-height: 48px;
+            outline: none;
+        }
+
+        .bd-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 .18rem rgba(59,130,246,.18);
+        }
+
+        .bd-error {
+            color: #f87171;
+            font-size: 12px;
+            margin-top: 6px;
+            display: block;
+        }
+
+        .bd-forgot {
+            color: #93c5fd;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .bd-forgot:hover {
+            color: #bfdbfe;
+            text-decoration: none;
+        }
+
+        .bd-btn {
+            width: 100%;
+            min-height: 50px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: #fff;
+            font-weight: 800;
+            margin-top: 22px;
+            transition: .15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .bd-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 26px rgba(37,99,235,.28);
+        }
+
+        .bd-btn:disabled {
+            opacity: .75;
+            cursor: not-allowed;
+        }
+
+        .loader {
+            border: 3px solid rgba(255,255,255,.25);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 
-<body style="background-color: #666666;">
+<body>
 
-	<div class="limiter">
-		<div class="container-login100">
-			<div class="wrap-login100">
-				<form id="loginForm" class="login100-form validate-form" method="POST" action="{{ route('login') }}">
-					@csrf
-					<span class="login100-form-title p-b-43">
-						Welcome Back 👋
-					</span>
-					<span>Please sign-in to your account</span>
-					<div class="wrap-input100 validate-input mt-1" data-validate="Valid email is required: ex@abc.xyz">
-						<input class="input100" type="text" name="email">
+<div class="bd-login-page">
+    <div class="bd-login-card">
 
-						<span class="focus-input100"></span>
-						<span class="label-input100">Email</span>
-					</div>
+        <div class="bd-logo">
+            <i class="fa fa-ship"></i>
+        </div>
 
-					<div class="wrap-input100 validate-input" data-validate="Password is required">
-						<input class="input100" type="password" name="password">
-						@error('password')
-						<span style="color:red;" role="alert">
-							<strong>{{ $message }}</strong>
-						</span>
-						@enderror
-						<span class="focus-input100"></span>
-						<span class="label-input100">Password</span>
-					</div>
-					<div style="margin-top:20px;" class="d-flex justify-content-end mb-2">
-						<a href="{{ route('forget.password.get') }}">Forgot your Password ? </a>
-					</div>
-					@error('email')
-					<div style="text-align: center; margin-top: 15px; margin-bottom: 15px;">
-						<span style="color: red;" role="alert">
-							<strong>{{ $message }}</strong>
-						</span>
-					</div>
-					@enderror
-					<div class="container-login100-form-btn">
-						<button class="login100-form-btn" id="loginBtn" onclick="showLoader()">
-							<span id="btnText">Log Me In</span>
-							<div class="loader" id="loader"></div>
-						</button>
-					</div>
+        <div class="bd-title">Welcome back</div>
+        <div class="bd-subtitle">Sign in to your boat telemetry dashboard.</div>
 
-				</form>
+        <form id="loginForm" method="POST" action="{{ route('login') }}">
+            @csrf
 
-			</div>
-		</div>
-	</div>
+            <div class="mb-3">
+                <label class="bd-label">Email</label>
+                <input
+                    class="bd-input"
+                    type="email"
+                    name="email"
+                    value="{{ old('email') }}"
+                    required
+                    autofocus
+                >
 
+                @error('email')
+                    <span class="bd-error"><strong>{{ $message }}</strong></span>
+                @enderror
+            </div>
 
+            <div class="mb-2">
+                <label class="bd-label">Password</label>
+                <input
+                    class="bd-input"
+                    type="password"
+                    name="password"
+                    required
+                    autocomplete="current-password"
+                >
 
-	<script>
-		function showLoader() {
-			var loader = document.getElementById('loader');
-			var btnText = document.getElementById('btnText');
+                @error('password')
+                    <span class="bd-error"><strong>{{ $message }}</strong></span>
+                @enderror
+            </div>
 
-			loader.style.display = 'inline-block';
-			btnText.style.display = 'none';
+            <div class="d-flex justify-content-end mt-3">
+                <a class="bd-forgot" href="{{ route('forget.password.get') }}">
+                    Forgot your password?
+                </a>
+            </div>
 
-			// Optionally, you can disable the button to prevent multiple submissions
-			document.getElementById('loginBtn').disabled = true;
+            <button type="submit" class="bd-btn" id="loginBtn">
+                <span id="btnText">Log in</span>
+                <div class="loader" id="loader"></div>
+            </button>
+        </form>
 
-			// Submit the form (you may want to use AJAX for asynchronous form submission)
-			document.getElementById('loginForm').submit();
-		}
-	</script>
+    </div>
+</div>
 
-	<!--===============================================================================================-->
-	<script src="login_assets/vendor/jquery/jquery-3.2.1.min.js"></script>
-	<!--===============================================================================================-->
-	<script src="login_assets/vendor/animsition/js/animsition.min.js"></script>
-	<!--===============================================================================================-->
-	<script src="login_assets/vendor/bootstrap/js/popper.js"></script>
-	<script src="login_assets/vendor/bootstrap/js/bootstrap.min.js"></script>
-	<!--===============================================================================================-->
-	<script src="login_assets/vendor/select2/select2.min.js"></script>
-	<!--===============================================================================================-->
-	<script src="login_assets/vendor/daterangepicker/moment.min.js"></script>
-	<script src="login_assets/vendor/daterangepicker/daterangepicker.js"></script>
-	<!--===============================================================================================-->
-	<script src="login_assets/vendor/countdowntime/countdowntime.js"></script>
-	<!--===============================================================================================-->
-	<script src="login_assets/js/main.js"></script>
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function () {
+        document.getElementById('loader').style.display = 'inline-block';
+        document.getElementById('btnText').style.display = 'none';
+        document.getElementById('loginBtn').disabled = true;
+    });
+</script>
 
 </body>
-
 </html>

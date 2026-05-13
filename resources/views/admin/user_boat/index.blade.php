@@ -7,18 +7,11 @@
 </style>
 @endsection
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0 font-size-18">Boats</h4>
-            {{-- {{ $errors }}--}}
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Dashboard</a></li>
-                    <li class="breadcrumb-item active">Boats</li>
-                </ol>
-                
-            </div>
+<div class="bd-page-header">
+    <div>
+        <h1 class="bd-title">User Boats</h1>
+        <div class="bd-subtitle">
+            Manage user boat assignments and access.
         </div>
     </div>
 </div>
@@ -26,7 +19,7 @@
 <div class="w-100">
     <div class="row justify-content-center">
         <div class="col-md-12 mt-4">
-            <div class="card p-4 rounded cShadow table-responsive">
+            <div class="bd-card bd-table-card table-responsive">
                 <table id="datatable" class="table table-bordered  table-hover dt-responsive display nowrap">
                     <thead>
                         <tr>

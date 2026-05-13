@@ -128,7 +128,7 @@ public function boundaryData(Request $request, BoatTrip $trip)
     }
 
     $before = DB::table('boatdata')
-        ->select('id', 'datetime', 'latdec', 'londec', 'sog', 'spd', 'cog')
+        ->select('id', 'datetime', 'latdec', 'londec', 'sog', 'spd', 'cog', 'rpm1')
         ->where('mac', $trip->mac)
         ->where('datetime', '<', $centre->datetime)
         ->orderByDesc('datetime')
@@ -138,7 +138,7 @@ public function boundaryData(Request $request, BoatTrip $trip)
         ->values();
 
     $after = DB::table('boatdata')
-        ->select('id', 'datetime', 'latdec', 'londec', 'sog', 'spd', 'cog')
+        ->select('id', 'datetime', 'latdec', 'londec', 'sog', 'spd', 'cog', 'rpm1')
         ->where('mac', $trip->mac)
         ->where('datetime', '>', $centre->datetime)
         ->orderBy('datetime')
@@ -154,6 +154,7 @@ public function boundaryData(Request $request, BoatTrip $trip)
         'sog' => $centre->sog,
         'spd' => $centre->spd,
         'cog' => $centre->cog,
+		'rpm1' => $centre->rpm1,
     ]]);
 
     $tableRows = $before
