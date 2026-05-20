@@ -18,9 +18,6 @@ use App\Http\Controllers\BoatRawDataController;
 use App\Http\Controllers\BoatInsureController;
 use App\Http\Controllers\BoatTripController;
 use App\Http\Controllers\TripDetectionConfigController;
-
-
-
 use Google\Service\AIPlatformNotebooks\Event;
 use Google\Service\AlertCenter\UserChanges;
 use Illuminate\Support\Facades\Auth;

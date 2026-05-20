@@ -1,11 +1,5 @@
 @extends('layouts.admin')
 @section('title', 'Boat')
-@section('css')
-
-<style>
-
-</style>
-@endsection
 @section('content')
 <div class="bd-page-header">
     <div>

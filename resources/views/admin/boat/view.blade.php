@@ -1,11 +1,5 @@
 @extends('layouts.admin')
 @section('title', 'Boat Notes and Files')
-@section('css')
-
-    <style>
-
-    </style>
-@endsection
 @section('content')
     <div class="row">
         <div class="col-12">

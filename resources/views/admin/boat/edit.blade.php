@@ -1,17 +1,5 @@
 @extends('layouts.admin')
 @section('title', 'Edit Boat')
-@section('css')
-
-<style>
-/* Remove the default number input arrows */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-</style>
-@endsection
 @section('content')
 <div class="row">
     <div class="col-12">
