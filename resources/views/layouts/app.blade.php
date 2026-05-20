@@ -16,6 +16,47 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
     <link rel="shortcut icon" href="{{ URL::asset('assets/images/icon_top.png') }}">
 
+@if(app()->environment('local'))
+
+<style>
+
+    body::before {
+        content: "LOCAL DEVELOPMENT SERVER";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 28px;
+
+        background: linear-gradient(
+            90deg,
+            #8b0000,
+            #d00000
+        );
+
+        color: white;
+        font-weight: 800;
+        font-size: 13px;
+        letter-spacing: 2px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        z-index: 999999;
+
+        box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+    }
+
+    body {
+        border-top: 28px solid #8b0000 !important;
+
+        filter: hue-rotate(-25deg);
+    }
+
+</style>
+
+@endif
 
 </head>
 <body>
