@@ -69,6 +69,16 @@
 <div class="container-fluid py-4 px-4">
 @include('partials.boat_nav', ['mac' => $mac ?? null])
 
+@php
+    $boatPlan = (int) ($boatPlan ?? ($deviceSettings->plan ?? 100));
+
+    $planName = match($boatPlan) {
+        200 => 'Motor Boat',
+        300 => 'Twin Engine Motor Boat',
+        default => 'Sailing Boat',
+    };
+@endphp
+
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
 
         <div>
@@ -137,6 +147,7 @@
 <div class="{{ $status === 'Online' ? 'text-success' : 'text-warning' }} fw-bold">
     Device Last Seen
 </div>
+
 
 <div class="muted small">
     {{ $deviceSettings->lastseen ?? '-' }}
@@ -287,23 +298,41 @@
 
     </div>
 
-    <div class="row g-4 mb-4">
+<div class="row g-4 mb-4">
 
-        <div class="col-xl-8">
-            <div class="glass p-4">
-                <h5 class="fw-bold mb-3">Speed</h5>
-                <canvas id="speedChart"></canvas>
-            </div>
+    <div class="{{ $boatPlan === 100 ? 'col-xl-8' : 'col-xl-4' }}">
+        <div class="glass p-4">
+
+            <h5 class="fw-bold mb-3">
+                Speed
+            </h5>
+
+            <canvas id="speedChart"></canvas>
+
         </div>
-
-        <div class="col-xl-4">
-            <div class="glass p-4">
-                <h5 class="fw-bold mb-3">Wind</h5>
-                <canvas id="windChart"></canvas>
-            </div>
-        </div>
-
     </div>
+
+    <div class="{{ $boatPlan === 100 ? 'col-xl-4' : 'col-xl-8' }}">
+        <div class="glass p-4">
+
+            <h5 class="fw-bold mb-3">
+
+                @if($boatPlan === 100)
+                    Wind
+                @elseif($boatPlan === 200)
+                    Engine / Fuel
+                @else
+                    Twin Engine / Fuel
+                @endif
+
+            </h5>
+
+            <canvas id="windChart"></canvas>
+
+        </div>
+    </div>
+
+</div>
 
     <div class="row g-4 mb-4">
 
@@ -504,11 +533,13 @@ new Chart(document.getElementById('speedChart'), {
     }
 });
 
-new Chart(document.getElementById('windChart'), {
-    type: 'line',
-    data: {
-        labels,
-        datasets: [{
+const boatPlan = {{ (int) ($boatPlan ?? ($deviceSettings->plan ?? 100)) }};
+
+let secondaryDatasets = [];
+
+if (boatPlan === 100) {
+    secondaryDatasets = [
+        {
             label: 'Max AWS',
             data: daily.map(r => Number(r.max_aws || 0)),
             borderColor: '#ffb347',
@@ -517,7 +548,125 @@ new Chart(document.getElementById('windChart'), {
             tension: 0.35,
             fill: true,
             pointRadius: 0
-        }]
+        },
+        {
+            label: 'Avg AWS',
+            data: daily.map(r => Number(r.avg_aws || 0)),
+            borderColor: '#7cffcb',
+            backgroundColor: 'rgba(124,255,203,0.08)',
+            borderWidth: 2,
+            tension: 0.35,
+            fill: false,
+            pointRadius: 0
+        }
+    ];
+}
+
+if (boatPlan === 200) {
+    secondaryDatasets = [
+        {
+            label: 'Fuel Rate',
+            data: daily.map(r => Number(r.fuel1_avg || 0)),
+            borderColor: '#ffb347',
+            backgroundColor: 'rgba(255,179,71,0.15)',
+            borderWidth: 3,
+            tension: 0.35,
+            fill: true,
+            pointRadius: 0,
+            yAxisID: 'fuel'
+        },
+        {
+            label: 'RPM',
+            data: daily.map(r => Number(r.avg_rpm1 || 0)),
+            borderColor: '#7cffcb',
+            backgroundColor: 'rgba(124,255,203,0.08)',
+            borderWidth: 2,
+            tension: 0.35,
+            fill: false,
+            pointRadius: 0,
+            yAxisID: 'rpm'
+        }
+    ];
+}
+
+if (boatPlan === 300) {
+    secondaryDatasets = [
+        {
+            label: 'Fuel Rate Engine 1',
+            data: daily.map(r => Number(r.fuel1_avg || 0)),
+            borderColor: '#ffb347',
+            backgroundColor: 'rgba(255,179,71,0.10)',
+            borderWidth: 3,
+            tension: 0.35,
+            fill: false,
+            pointRadius: 0,
+            yAxisID: 'fuel'
+        },
+        {
+            label: 'Fuel Rate Engine 2',
+            data: daily.map(r => Number(r.fuel2_avg || 0)),
+            borderColor: '#00e5ff',
+            backgroundColor: 'rgba(0,229,255,0.10)',
+            borderWidth: 3,
+            tension: 0.35,
+            fill: false,
+            pointRadius: 0,
+            yAxisID: 'fuel'
+        },
+        {
+            label: 'RPM Engine 1',
+            data: daily.map(r => Number(r.avg_rpm1 || 0)),
+            borderColor: '#7cffcb',
+            borderWidth: 2,
+            tension: 0.35,
+            fill: false,
+            pointRadius: 0,
+            yAxisID: 'rpm'
+        },
+        {
+            label: 'RPM Engine 2',
+            data: daily.map(r => Number(r.avg_rpm2 || 0)),
+            borderColor: '#ff6bcb',
+            borderWidth: 2,
+            tension: 0.35,
+            fill: false,
+            pointRadius: 0,
+            yAxisID: 'rpm'
+        }
+    ];
+}
+
+new Chart(document.getElementById('windChart'), {
+    type: 'line',
+    data: {
+        labels,
+        datasets: secondaryDatasets
+    },
+    options: {
+        scales: {
+            fuel: {
+                type: 'linear',
+                position: 'left',
+                beginAtZero: true,
+                title: {
+                    display: boatPlan !== 100,
+                    text: 'Fuel'
+                }
+            },
+            rpm: {
+                type: 'linear',
+                position: 'right',
+                beginAtZero: true,
+                display: boatPlan !== 100,
+                grid: {
+                    drawOnChartArea: false
+                },
+                title: {
+                    display: boatPlan !== 100,
+                    text: 'RPM'
+                }
+            }
+        }
     }
 });
 

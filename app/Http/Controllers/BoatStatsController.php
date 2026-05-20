@@ -48,6 +48,14 @@ class BoatStatsController extends Controller
                 AVG(NULLIF(sog,0)) as avg_sog,
                 MAX(NULLIF(aws,0)) as max_aws,
                 AVG(NULLIF(aws,0)) as avg_aws,
+				SUM(NULLIF(fuelr1,0)) as fuel1_total,
+				AVG(NULLIF(fuelr1,0)) as fuel1_avg,
+				SUM(NULLIF(fuelr2,0)) as fuel2_total,
+				AVG(NULLIF(fuelr2,0)) as fuel2_avg,
+				MAX(NULLIF(rpm1,0)) as max_rpm1,
+				MAX(NULLIF(rpm2,0)) as max_rpm2,
+				AVG(NULLIF(rpm1,0)) as avg_rpm1,
+				AVG(NULLIF(rpm2,0)) as avg_rpm2,
                 COUNT(*) as records
             ')
             ->get();
@@ -112,7 +120,8 @@ class BoatStatsController extends Controller
                 'gprsuser',
                 'update_to',
                 'lastseen',
-                'version'
+                'version',
+				'plan'
             )
             ->first();
 
@@ -182,6 +191,8 @@ if ($deviceSettings && $deviceSettings->lastseen) {
             15 => 'Reboot',
             16 => 'GPSReboot',
         ];
+		
+		$boatPlan = (int) ($deviceSettings->plan ?? 100);
 
         return view('boat_stats', [
             'boats' => $boats,
@@ -197,6 +208,7 @@ if ($deviceSettings && $deviceSettings->lastseen) {
             'deviceSettings' => $deviceSettings,
             'uploadLogs' => $uploadLogs,
             'uploadStatusCodes' => $uploadStatusCodes,
+			'boatPlan' => $boatPlan,
         ]);
     }
 }
