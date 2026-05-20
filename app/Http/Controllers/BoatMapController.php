@@ -19,6 +19,13 @@ class BoatMapController extends Controller
     default => 60,
 };
 
+$deviceSettings = DB::table('settings')
+    ->where('mac', $mac)
+    ->select('boatname', 'mac')
+    ->first();
+
+$boatName = $deviceSettings->boatname ?? null;
+
 $query = DB::table('boatdata')
     ->selectRaw("
         AVG(latdec) AS latdec,
@@ -104,13 +111,15 @@ $points = $query
             $i++;
         }
 
-        return view('boat-map.show', [
-            'mac' => $mac,
-            'days' => $days,
-            'geojson' => [
-                'type' => 'FeatureCollection',
-                'features' => $features,
-            ],
-        ]);
+return view('boat-map.show', [
+    'mac' => $mac,
+    'days' => $days,
+    'boatName' => $boatName,
+    'deviceSettings' => $deviceSettings,
+    'geojson' => [
+        'type' => 'FeatureCollection',
+        'features' => $features,
+    ],
+]);
     }
 }

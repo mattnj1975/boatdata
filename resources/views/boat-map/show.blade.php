@@ -8,7 +8,7 @@
 <style>
     #boatMap {
         width: 100%;
-        height: calc(100vh - 70px);
+        height: calc(100vh - 125px);
     }
 
     .boat-map-header {
@@ -39,17 +39,29 @@
 
 <div class="boat-map-header">
 
+    @include('partials.boat_nav', ['mac' => $mac ?? null])
+
     <div style="
         display:flex;
         justify-content:space-between;
         align-items:center;
         gap:15px;
         flex-wrap:wrap;
+        margin-top:10px;
     ">
 
-        <h4>
-            Tracks for vessel: {{ $mac }}
-        </h4>
+<div>
+    <h4 style="margin-bottom:2px;">
+        {{ $boatName ?? ($deviceSettings->boatname ?? 'Boat Track') }}
+    </h4>
+
+    <div style="
+        font-size:0.85rem;
+        opacity:0.7;
+    ">
+        {{ $mac }}
+    </div>
+</div>
 
         <div class="boat-map-buttons">
 

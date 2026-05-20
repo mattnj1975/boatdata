@@ -67,6 +67,7 @@
 <body>
 
 <div class="container-fluid py-4 px-4">
+@include('partials.boat_nav', ['mac' => $mac ?? null])
 
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
 
@@ -134,25 +135,17 @@
                 </div>
 
 <div class="{{ $status === 'Online' ? 'text-success' : 'text-warning' }} fw-bold">
-    {{ $status === 'Online' ? 'Current Speed' : 'Last Data' }}
+    Device Last Seen
 </div>
-
-
 
 <div class="muted small">
-    {{ $latest ? $latest->date . ' ' . $latest->utc : '-' }}
+    {{ $deviceSettings->lastseen ?? '-' }}
 </div>
 
-<div class="mt-3">
-
-    <a
-        href="{{ url('/boat-map/' . $mac) }}"
-        class="btn btn-outline-info fw-bold"
-    >
-        View Full Track Map
-    </a>
-
+<div class="muted small mt-1">
+    {{ $lastSeenAge }}
 </div>
+
 
                 <hr style="border-color:rgba(255,255,255,0.12)">
 
@@ -218,12 +211,7 @@
                         </div>
                     </div>
 					
-					<a
-    href="{{ url('boat-raw/' . $mac . '/7d') }}"
-    class="btn btn-outline-light fw-bold"
->
-    View Sample Raw Data
-</a>
+					
 
                 </div>
 
@@ -566,10 +554,22 @@ const sog = Number(latest.sog || 0);
 
 const map = L.map('boatMap').setView([lat, lon], 13);
 
+// Base map
 L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
-        maxZoom: 19
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+    }
+).addTo(map);
+
+// OpenSeaMap overlay
+L.tileLayer(
+    'https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png',
+    {
+        maxZoom: 18,
+        opacity: 0.9,
+        attribution: '&copy; OpenSeaMap'
     }
 ).addTo(map);
 
@@ -598,7 +598,9 @@ function destinationPoint(lat, lon, bearingDeg, distanceNm) {
     ];
 }
 
-const latestTime = new Date(`${latest.date}T${latest.utc}`);
+const latestTime = new Date(
+    `${latest.date} ${latest.utc}`.replace(' ', 'T')
+);
 const ageMinutes = (new Date() - latestTime) / 1000 / 60;
 const isRecentPosition = ageMinutes <= 10;
 
@@ -650,8 +652,8 @@ L.marker([lat, lon], { icon: boatIcon })
     .addTo(map)
     .bindPopup(`
         <strong>{{ $deviceSettings->boatname ?? $mac }}</strong><br>
-        Last seen: ${latest.date} ${latest.utc}<br>
-        Last position: ${formatAge(ageMinutes)} ago<br>
+Device last seen: {{ $deviceSettings->lastseen ?? '-' }}<br>
+GPS position age: ${formatAge(ageMinutes)} ago<br>
         SOG ${sog.toFixed(1)} kn<br>
         COG ${cog.toFixed(0)}°
     `)
