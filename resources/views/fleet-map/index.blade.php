@@ -169,7 +169,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         statusEl.innerText = 'Loading boats...';
 
-        const boatsResponse = await fetch("{{ route('fleet.map.boats') }}");
+        const boatsResponse = await fetch(
+    "{{ url('/fleet-map/boats') }}/" + days
+);
         const boats = await boatsResponse.json();
 
         let drawn = 0;

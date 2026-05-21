@@ -12,17 +12,22 @@ class FleetMapController extends Controller
         return view('fleet-map.index');
     }
 
-    public function boats()
-    {
-        return Cache::remember('fleet-map-boats', 300, function () {
-            return DB::table('settings')
-                ->select('mac', 'boatname')
-                ->where('public', 1)
-                ->whereNotNull('mac')
-                ->orderBy('boatname')
-                ->get();
-        });
-    }
+public function boats($days = 365)
+{
+    $days = in_array((int)$days, [7,30,90,365]) ? (int)$days : 365;
+
+    return Cache::remember("fleet-map-boats-{$days}", 300, function () use ($days) {
+
+        return DB::table('settings')
+            ->select('mac', 'boatname', 'lastseen')
+            ->where('public', 1)
+            ->whereNotNull('mac')
+            ->whereNotNull('lastseen')
+            ->where('lastseen', '>=', now()->subDays($days))
+            ->orderByDesc('lastseen')
+            ->get();
+    });
+}
 
 public function boatData(string $mac, int $days = 365)
 {

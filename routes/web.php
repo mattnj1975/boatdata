@@ -76,7 +76,7 @@ Auth::routes();
 
 Route::get('/boat-raw/{mac}/{range?}', [BoatRawDataController::class, 'show']) ->name('boat.raw');
 Route::get('/boat-insure/{mac}', [BoatInsureController::class, 'show'])  ->name('boat.insure');
-Route::get('/fleet-map/boats', [FleetMapController::class, 'boats'])->name('fleet.map.boats');
+Route::get('/fleet-map/boats/{days?}', [FleetMapController::class, 'boats']);
 Route::get('/fleet-map/data/{mac}/{days?}', [FleetMapController::class, 'boatData'])->name('fleet.map.boatData');
 Route::get('/fleet-map', [FleetMapController::class, 'index']) ->name('fleet.map');
 Route::get('/boat-map/{mac}/{days?}', [BoatMapController::class, 'show'])   ->name('boat.map');
