@@ -116,6 +116,7 @@
         </div>
 
     </div>
+	@include('partials.boat_nav', ['mac' => $mac ?? null])
 
 
 <div class="row">
@@ -369,21 +370,10 @@
     '<i style="cursor:pointer;" class="fa fa-map viewLink viewTrack"></i>' +
 '</a>' +
 
-        '<a href="/view/boat-map/' + item['mac'] + '" title="Full Map">' +
-            '<i class="fa fa-globe"></i>' +
-        '</a>' +
-
-        '<a href="/view/boat-stats/' + item['mac'] + '" title="Dashboard">' +
-            '<i class="fa fa-dashboard"></i>' +
-        '</a>' +
-
-        '<a href="/view/boat-insure/' + item['mac'] + '" title="Insurance">' +
-            '<i class="fa fa-shield"></i>' +
-        '</a>' +
-
-        '<a href="/view/trips?mac=' + item['mac'] + '&status=auto" title="Trips">' +
-            '<i class="fa fa-ship"></i>' +
-        '</a>' +
+        
+'<a href="/view/boat-ais/' + item['mac'] + '/' + item['TripDate'] + '" title="AIS Traffic" style="color:#0d6efd;">' +
+    '<i class="fa fa-ship"></i>' +
+'</a>' +
 
     '</div>' +
 '</td>' +

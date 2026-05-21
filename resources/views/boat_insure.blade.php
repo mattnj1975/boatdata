@@ -219,7 +219,7 @@
         }
     }
 </style>
-
+@include('partials.boat_nav', ['mac' => $mac ?? null])
 <div class="dash-wrap">
     <div class="dash-header">
         <div>
@@ -227,11 +227,7 @@
             <div class="sub">MAC: {{ $mac }} · Showing {{ $rangeOptions[$range] ?? $range }}</div>
         </div>
 
-        <div class="dash-links">
-            <a href="{{ route('boat.stats', $mac) }}">Stats</a>
-            <a href="{{ route('boat.raw', [$mac, '7d']) }}">Raw Data</a>
-            <a href="{{ route('boat.map', $mac) }}">Map</a>
-        </div>
+        
     </div>
 
     <div class="panel">

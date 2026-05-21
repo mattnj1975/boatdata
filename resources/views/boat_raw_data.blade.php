@@ -42,6 +42,7 @@
 </head>
 
 <body>
+@include('partials.boat_nav', ['mac' => $mac ?? null])
 
 <div class="container-fluid py-4 px-4">
 
@@ -57,9 +58,7 @@
             </div>
         </div>
 
-        <a href="{{ url('boat-stats/' . $mac) }}" class="btn btn-outline-light fw-bold">
-            Dashboard
-        </a>
+        
 
     </div>
 
