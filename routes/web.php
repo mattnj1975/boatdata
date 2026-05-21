@@ -18,6 +18,7 @@ use App\Http\Controllers\BoatRawDataController;
 use App\Http\Controllers\BoatInsureController;
 use App\Http\Controllers\BoatTripController;
 use App\Http\Controllers\TripDetectionConfigController;
+use App\Http\Controllers\BoatAisController;
 use Google\Service\AIPlatformNotebooks\Event;
 use Google\Service\AlertCenter\UserChanges;
 use Illuminate\Support\Facades\Auth;
@@ -65,6 +66,11 @@ Route::post('/assets/ajax/get-log-data', [TripsController::class, 'getLogData'])
 Route::post('/assets/ajax/get-table-data', [TripsController::class, 'getTableData'])->name('admin.getTableData');
 Route::post('/assets/ajax/get-speed-data', [TripsController::class, 'fetchSpeed'])->name('admin.fetchSpeed');
 Route::post('/assets/ajax/get-engine-data', [TripsController::class, 'fetchEngine'])->name('admin.fetchEngine');
+
+Route::get('/api/boat-ais/{mac}/{date}', [BoatAisController::class, 'data'])->name('boat.ais.data');
+Route::get('/boat-ais/{mac}/{date?}', [BoatAisController::class, 'show']) ->name('boat.ais');
+
+
 Auth::routes();
 
 
