@@ -134,9 +134,11 @@ if ($deviceSettings && $deviceSettings->lastseen) {
 
         $lastSeen = Carbon::parse($deviceSettings->lastseen);
 
-        $mins = $lastSeen->diffInMinutes(now());
+        $mins = max(0, $lastSeen->diffInMinutes(now(), false));
 
-        $lastSeenAge = $lastSeen->diffForHumans();
+        $lastSeenAge = $mins === 0
+    ? 'just now'
+    : $lastSeen->diffForHumans();
 
         if ($mins <= 15) {
 
