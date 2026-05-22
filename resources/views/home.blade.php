@@ -155,6 +155,17 @@ table tbody tr:hover {
 </style>
 @endsection
 @section('content')
+
+<div class="container-fluid px-4">
+    <div class="row">
+        <div class="col">
+            <div class="d-flex justify-content-center mb-2">
+                <a class="btn btn-outline-secondary" href="{{route('dashboard')}}" style="width: 250px;">Login to Admin Panel</a>
+            </div>
+        </div>
+
+    </div>	
+
 <div class="marine-hero">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">

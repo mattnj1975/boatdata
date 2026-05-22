@@ -231,21 +231,35 @@ function drawAisTargets(targets) {
             .filter(p => validLatLon(p.lat, p.lon))
             .map(p => [p.lat, p.lon]);
 
-        if (points.length < 2) {
+        if (points.length === 0) {
             return;
         }
 
         const colour = getRangeColour(target.min_range_nm);
 
-const popup = `
-    <strong>AIS Target</strong><br>
-    MMSI: ${target.mmsi}<br>
-    Closest: ${target.min_range_nm ?? '?'} NM<br>
-    Closest time: ${target.closest?.time ?? '?'}<br>
-    AIS SOG/COG: ${target.closest?.ais_sog ?? '?'} kn / ${target.closest?.ais_cog ?? '?'}°<br>
-    Points: ${target.point_count ?? points.length}
-`;
+        const popup = `
+            <strong>AIS Target</strong><br>
+            MMSI: ${target.mmsi}<br>
+            Closest: ${target.min_range_nm ?? '?'} NM<br>
+            Closest time: ${target.closest?.time ?? '?'}<br>
+            AIS SOG/COG: ${target.closest?.ais_sog ?? '?'} kn / ${target.closest?.ais_cog ?? '?'}°<br>
+            Points: ${target.point_count ?? points.length}
+        `;
 
+        // Stationary / marina target — show as dot
+        if (points.length === 1) {
+            const marker = L.circleMarker(points[0], {
+                radius: 5,
+                color: colour,
+                weight: 2,
+                fillOpacity: 0.8
+            }).bindPopup(popup);
+
+            aisLayerGroup.addLayer(marker);
+            return;
+        }
+
+        // Moving target — show as track
         const line = L.polyline(points, {
             color: colour,
             weight: 2,
@@ -287,27 +301,27 @@ const popup = `
 
             closestLayerGroup.addLayer(closestMarker);
         }
-		
-		if (
-    target.closest &&
-    validLatLon(target.closest.boat_lat, target.closest.boat_lon) &&
-    validLatLon(target.closest.ais_lat, target.closest.ais_lon)
-) {
-    const cpaLine = L.polyline(
-        [
-            [target.closest.boat_lat, target.closest.boat_lon],
-            [target.closest.ais_lat, target.closest.ais_lon]
-        ],
-        {
-            color: colour,
-            weight: 2,
-            opacity: 0.7,
-            dashArray: '4,6'
-        }
-    ).bindPopup(popup);
 
-    closestLayerGroup.addLayer(cpaLine);
-}
+        if (
+            target.closest &&
+            validLatLon(target.closest.boat_lat, target.closest.boat_lon) &&
+            validLatLon(target.closest.ais_lat, target.closest.ais_lon)
+        ) {
+            const cpaLine = L.polyline(
+                [
+                    [target.closest.boat_lat, target.closest.boat_lon],
+                    [target.closest.ais_lat, target.closest.ais_lon]
+                ],
+                {
+                    color: colour,
+                    weight: 2,
+                    opacity: 0.7,
+                    dashArray: '4,6'
+                }
+            ).bindPopup(popup);
+
+            closestLayerGroup.addLayer(cpaLine);
+        }
 
         const lastPoint = target.track[target.track.length - 1];
 
