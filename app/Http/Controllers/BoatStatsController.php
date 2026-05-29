@@ -80,17 +80,17 @@ class BoatStatsController extends Controller
          */
 $latest = DB::table('boat_latest')
     ->where('mac', $mac)
-    ->select(
-        'mac',
-        'last_seen',
-        'latdec',
-        'londec',
-        'sog',
-        'cog',
-        'hdg',
-        'depth',
-        'aws'
-    )
+    ->selectRaw('
+        mac,
+        last_seen,
+        lat as latdec,
+        lon as londec,
+        sog,
+        cog,
+        hdg,
+        dep as depth,
+        aws
+    ')
     ->first();
 
 $statusLastSeen = $latest->last_seen ?? $deviceSettings->lastseen ?? null;
