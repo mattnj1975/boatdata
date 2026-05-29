@@ -17,9 +17,8 @@ class BoatRawDataController extends Controller
 
         $rows = DB::table('boatdata')
             ->where('mac', $mac)
-            ->orderByDesc('date')
-            ->orderByDesc('utc')
-            ->limit(20)
+            ->orderByDesc('datetime')
+            ->limit(40)
             ->get();
 
         return view('boat_raw_data', [

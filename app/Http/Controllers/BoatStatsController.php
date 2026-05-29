@@ -48,14 +48,14 @@ class BoatStatsController extends Controller
                 AVG(NULLIF(sog,0)) as avg_sog,
                 MAX(NULLIF(aws,0)) as max_aws,
                 AVG(NULLIF(aws,0)) as avg_aws,
-				SUM(NULLIF(fuelr1,0)) as fuel1_total,
-				AVG(NULLIF(fuelr1,0)) as fuel1_avg,
-				SUM(NULLIF(fuelr2,0)) as fuel2_total,
-				AVG(NULLIF(fuelr2,0)) as fuel2_avg,
-				MAX(NULLIF(rpm1,0)) as max_rpm1,
-				MAX(NULLIF(rpm2,0)) as max_rpm2,
-				AVG(NULLIF(rpm1,0)) as avg_rpm1,
-				AVG(NULLIF(rpm2,0)) as avg_rpm2,
+                SUM(NULLIF(fuelr1,0)) as fuel1_total,
+                AVG(NULLIF(fuelr1,0)) as fuel1_avg,
+                SUM(NULLIF(fuelr2,0)) as fuel2_total,
+                AVG(NULLIF(fuelr2,0)) as fuel2_avg,
+                MAX(NULLIF(rpm1,0)) as max_rpm1,
+                MAX(NULLIF(rpm2,0)) as max_rpm2,
+                AVG(NULLIF(rpm1,0)) as avg_rpm1,
+                AVG(NULLIF(rpm2,0)) as avg_rpm2,
                 COUNT(*) as records
             ')
             ->get();
@@ -74,24 +74,50 @@ class BoatStatsController extends Controller
             ')
             ->get();
 
-        $latest = DB::table('boatdata')
-            ->where('mac', $mac)
-            ->whereNotNull('latdec')
-            ->whereNotNull('londec')
-            ->where('latdec', '!=', 0)
-            ->whereRaw('ABS(londec) > 0')
-            ->orderByDesc('date')
-            ->orderByDesc('utc')
-            ->select(
-                'latdec',
-                'londec',
-                'sog',
-                'cog',
-                'aws',
-                'date',
-                'utc'
-            )
-            ->first();
+        /*
+         * NEW: latest/live data now comes from boat_latest,
+         * not from the big boatdata table.
+         */
+$latest = DB::table('boat_latest')
+    ->where('mac', $mac)
+    ->select(
+        'mac',
+        'last_seen',
+        'latdec',
+        'londec',
+        'sog',
+        'cog',
+        'hdg',
+        'depth',
+        'aws'
+    )
+    ->first();
+
+$statusLastSeen = $latest->last_seen ?? $deviceSettings->lastseen ?? null;
+
+$status = 'Offline';
+$lastSeenAge = 'Unknown';
+
+if ($statusLastSeen) {
+    try {
+        $lastSeen = Carbon::parse($statusLastSeen);
+        $mins = max(0, $lastSeen->diffInMinutes(now(), false));
+
+        $lastSeenAge = $mins < 1
+            ? 'just now'
+            : $lastSeen->diffForHumans(null, true) . ' ago';
+
+        if ($mins <= 15) {
+            $status = 'Online';
+        } elseif ($mins <= 120) {
+            $status = 'Idle';
+        } elseif ($mins <= 1440) {
+            $status = 'Stale';
+        }
+    } catch (\Exception $e) {
+        //
+    }
+}
 
         $totalMiles = DB::table(DB::raw("
             (
@@ -121,43 +147,38 @@ class BoatStatsController extends Controller
                 'update_to',
                 'lastseen',
                 'version',
-				'plan'
+                'plan'
             )
             ->first();
 
+        /*
+         * Prefer boat_latest.last_seen.
+         * Fall back to settings.lastseen if boat_latest has no row yet.
+         */
+        $statusLastSeen = $latest->last_seen ?? $deviceSettings->lastseen ?? null;
+
         $status = 'Offline';
-$lastSeenAge = 'Unknown';
+        $lastSeenAge = 'Unknown';
 
-if ($deviceSettings && $deviceSettings->lastseen) {
+        if ($statusLastSeen) {
+            try {
+                $lastSeen = Carbon::parse($statusLastSeen);
+                $mins = max(0, $lastSeen->diffInMinutes(now(), false));
 
-    try {
+                $lastSeenAge = $mins === 0
+                    ? 'just now'
+                    : $lastSeen->diffForHumans();
 
-        $lastSeen = Carbon::parse($deviceSettings->lastseen);
-
-        $mins = max(0, $lastSeen->diffInMinutes(now(), false));
-
-        $lastSeenAge = $mins === 0
-    ? 'just now'
-    : $lastSeen->diffForHumans();
-
-        if ($mins <= 15) {
-
-            $status = 'Online';
-
-        } elseif ($mins <= 120) {
-
-            $status = 'Idle';
-
-        } elseif ($mins <= 1440) {
-
-            $status = 'Stale';
+                if ($mins <= 15) {
+                    $status = 'Online';
+                } elseif ($mins <= 120) {
+                    $status = 'Idle';
+                } elseif ($mins <= 1440) {
+                    $status = 'Stale';
+                }
+            } catch (\Exception $e) {
+            }
         }
-
-    } catch (\Exception $e) {
-    }
-}
-
-
 
         $uploadLogs = DB::table('uploadlog')
             ->where('device_id', $mac)
@@ -193,8 +214,8 @@ if ($deviceSettings && $deviceSettings->lastseen) {
             15 => 'Reboot',
             16 => 'GPSReboot',
         ];
-		
-		$boatPlan = (int) ($deviceSettings->plan ?? 100);
+
+        $boatPlan = (int) ($deviceSettings->plan ?? 100);
 
         return view('boat_stats', [
             'boats' => $boats,
@@ -207,10 +228,11 @@ if ($deviceSettings && $deviceSettings->lastseen) {
             'totalMiles' => $totalMiles ?? 0,
             'status' => $status,
             'lastSeenAge' => $lastSeenAge,
+            'statusLastSeen' => $statusLastSeen,
             'deviceSettings' => $deviceSettings,
             'uploadLogs' => $uploadLogs,
             'uploadStatusCodes' => $uploadStatusCodes,
-			'boatPlan' => $boatPlan,
+            'boatPlan' => $boatPlan,
         ]);
     }
 }

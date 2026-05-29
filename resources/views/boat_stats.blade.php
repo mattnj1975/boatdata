@@ -150,7 +150,7 @@
 
 
 <div class="muted small">
-    {{ $deviceSettings->lastseen ?? '-' }}
+    {{ $statusLastSeen ?? '-' }}
 </div>
 
 <div class="muted small mt-1">
@@ -175,6 +175,12 @@
                             {{ number_format($latest->aws ?? 0,1) }} kn
                         </div>
                     </div>
+					<div class="col-6">
+    <div class="muted small">Depth</div>
+    <div class="h4 fw-bold">
+        {{ number_format($latest->depth ?? 0,1) }} m
+    </div>
+</div>
 
                 </div>
 
@@ -218,7 +224,7 @@
                     <div class="col-12">
                         <div class="muted small">Device Last Online</div>
                         <div class="fw-bold">
-                            {{ $deviceSettings->lastseen ?? '-' }}
+                            {{ $statusLastSeen ?? '-' }}
                         </div>
                     </div>
 					
@@ -230,9 +236,9 @@
 
             <div class="col-lg-8">
 
-                @if($latest)
-                    <div id="boatMap"></div>
-                @endif
+@if($latest && $latest->latdec && $latest->londec)
+    <div id="boatMap"></div>
+@endif
 
             </div>
 
@@ -694,7 +700,7 @@ new Chart(document.getElementById('monthlyChart'), {
     }
 });
 
-@if($latest)
+@if($latest && $latest->latdec && $latest->londec)
 
 const lat = Number(latest.latdec);
 const lon = Number(latest.londec);
@@ -747,9 +753,7 @@ function destinationPoint(lat, lon, bearingDeg, distanceNm) {
     ];
 }
 
-const latestTime = new Date(
-    `${latest.date} ${latest.utc}`.replace(' ', 'T')
-);
+const latestTime = new Date(String(latest.last_seen).replace(' ', 'T'));
 const ageMinutes = (new Date() - latestTime) / 1000 / 60;
 const isRecentPosition = ageMinutes <= 10;
 
@@ -801,7 +805,7 @@ L.marker([lat, lon], { icon: boatIcon })
     .addTo(map)
     .bindPopup(`
         <strong>{{ $deviceSettings->boatname ?? $mac }}</strong><br>
-Device last seen: {{ $deviceSettings->lastseen ?? '-' }}<br>
+Device last seen: {{ $statusLastSeen ?? '-' }}<br>
 GPS position age: ${formatAge(ageMinutes)} ago<br>
         SOG ${sog.toFixed(1)} kn<br>
         COG ${cog.toFixed(0)}°

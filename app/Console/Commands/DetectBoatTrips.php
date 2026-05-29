@@ -39,9 +39,12 @@ class DetectBoatTrips extends Command
         return self::SUCCESS;
     }
 
-    private function detectForMac(string $mac, TripDetectionConfig $config): void
-    {
-        $records = DB::table('boatdata')
+private function detectForMac(string $mac, TripDetectionConfig $config): void
+{
+    $lastProcessedId = BoatTrip::where('mac', $mac)
+        ->max('end_boatdata_id');
+
+    $records = DB::table('boatdata')
             ->select([
                 'id',
                 'mac',
@@ -55,14 +58,18 @@ class DetectBoatTrips extends Command
                 'rpm2',
             ])
             ->where('mac', $mac)
-            ->whereNotNull('datetime')
-            ->whereNotNull('latdec')
-            ->whereNotNull('londec')
+->whereNotNull('datetime')
+->whereNotNull('latdec')
+->whereNotNull('londec')
+->when(
+    !$this->option('from') && $lastProcessedId,
+    fn ($q) => $q->where('id', '>', $lastProcessedId)
+)
             ->when($this->option('from'), fn ($q) => $q->where('datetime', '>=', $this->option('from')))
             ->when($this->option('to'), fn ($q) => $q->where('datetime', '<=', $this->option('to')))
-            ->orderBy('datetime')
-            ->orderBy('id')
-            ->get();
+->orderBy('datetime')
+->orderBy('id')
+->lazy(500);
 
         $trip = null;
         $movingSince = null;
@@ -135,7 +142,7 @@ class DetectBoatTrips extends Command
         }
 
         if ($trip && $lastRecord) {
-            $this->saveTrip($mac, $trip, $lastRecord);
+            // Don't save trips still in progress
         }
     }
 
@@ -171,6 +178,11 @@ class DetectBoatTrips extends Command
     {
         $start = $trip['start'];
         $detectedStart = $trip['detected_start'];
+
+		if (Carbon::parse($endRecord->datetime)->lessThanOrEqualTo(Carbon::parse($start->datetime))) {
+    $this->warn("Skipped bad trip: {$mac} {$start->datetime} to {$endRecord->datetime}");
+    return;
+}
 
         $exists = BoatTrip::where('mac', $mac)
             ->where('detected_start_boatdata_id', $detectedStart->id)
